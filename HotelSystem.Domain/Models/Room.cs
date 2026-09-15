@@ -8,5 +8,5 @@ public class Room
 
     public bool HasBalcony { get; set; }
 
-    public RoomType RoomType { get; set; }
+    public required RoomType RoomType { get; set; }
 }
