@@ -6,9 +6,18 @@ namespace HotelSystem.Tests;
 public class HotelTests
 {
     [Fact]
-    public void GetClientsByRoomType_ReturnsClientsOrderedByFullName()
+    public void GetClientsByRoomType()
     {
         var roomCategory = RoomCategory.Standard;
+
+        var expectedClients = new[]
+        {
+            "Белов Борис Сергеевич",
+            "Васильева Виктория Андреевна",
+            "Громов Георгий Иванович",
+            "Егоров Евгений Максимович",
+            "Жукова Жанна Романовна"
+        };
 
         var result = HotelTestData.Bookings
             .Where(booking => booking.Room.RoomType.Category == roomCategory)
@@ -18,21 +27,21 @@ public class HotelTests
             .ToList();
 
         Assert.Equal(
-            new[]
-            {
-                "Белов Борис Сергеевич",
-                "Васильева Виктория Андреевна",
-                "Громов Георгий Иванович",
-                "Егоров Евгений Максимович",
-                "Жукова Жанна Романовна"
-            },
+            expectedClients,
             result.Select(client => client.FullName).ToArray());
     }
 
     [Fact]
-    public void GetCurrentlyBookedRooms_ReturnsActiveBookings()
+    public void GetCurrentlyBookedRooms()
     {
         var currentDate = new DateTime(2026, 9, 10);
+
+        var expectedRooms = new[]
+        {
+            103,
+            203,
+            401
+        };
 
         var result = HotelTestData.Bookings
             .Where(booking =>
@@ -44,18 +53,31 @@ public class HotelTests
             .ToList();
 
         Assert.Equal(
-            new[]
-            {
-                103,
-                203,
-                401
-            },
+            expectedRooms,
             result.Select(room => room.RoomNumber).ToArray());
     }
 
     [Fact]
-    public void GetTop5MostFrequentlyBookedRooms_ReturnsCorrectRooms()
+    public void GetTop5MostFrequentlyBookedRooms()
     {
+        var expectedRoomNumbers = new[]
+        {
+            203,
+            102,
+            202,
+            101,
+            103
+        };
+
+        var expectedBookingCounts = new[]
+        {
+            3,
+            2,
+            2,
+            1,
+            1
+        };
+
         var result = HotelTestData.Bookings
             .GroupBy(booking => booking.Room)
             .OrderByDescending(group => group.Count())
@@ -69,31 +91,45 @@ public class HotelTests
             .ToList();
 
         Assert.Equal(
-            new[]
-            {
-                203,
-                102,
-                202,
-                101,
-                103
-            },
+            expectedRoomNumbers,
             result.Select(room => room.RoomNumber).ToArray());
 
         Assert.Equal(
-            new[]
-            {
-                3,
-                2,
-                2,
-                1,
-                1
-            },
+            expectedBookingCounts,
             result.Select(room => room.BookingCount).ToArray());
     }
 
     [Fact]
-    public void GetBookingCountForEachRoom_ReturnsCorrectCounts()
+    public void GetBookingCountForEachRoom()
     {
+        var expectedRoomNumbers = new[]
+        {
+            101,
+            102,
+            103,
+            201,
+            202,
+            203,
+            301,
+            302,
+            303,
+            401
+        };
+
+        var expectedBookingCounts = new[]
+        {
+            1,
+            2,
+            1,
+            1,
+            2,
+            3,
+            1,
+            1,
+            1,
+            1
+        };
+
         var result = HotelTestData.Rooms
             .Select(room => new
             {
@@ -105,41 +141,35 @@ public class HotelTests
             .ToList();
 
         Assert.Equal(
-            new[]
-            {
-                101,
-                102,
-                103,
-                201,
-                202,
-                203,
-                301,
-                302,
-                303,
-                401
-            },
+            expectedRoomNumbers,
             result.Select(room => room.RoomNumber).ToArray());
 
         Assert.Equal(
-            new[]
-            {
-                1,
-                2,
-                1,
-                1,
-                2,
-                3,
-                1,
-                1,
-                1,
-                1
-            },
+            expectedBookingCounts,
             result.Select(room => room.BookingCount).ToArray());
     }
 
     [Fact]
-    public void GetTop5ClientsByTotalAccommodationCost_ReturnsCorrectClients()
+    public void GetTop5ClientsByTotalCost()
     {
+        var expectedClients = new[]
+        {
+            "Васильева Виктория Андреевна",
+            "Захаров Захар Денисович",
+            "Громов Георгий Иванович",
+            "Иванова Ирина Павловна",
+            "Белов Борис Сергеевич"
+        };
+
+        var expectedCosts = new[]
+        {
+            106000m,
+            95000m,
+            89000m,
+            47500m,
+            32700m
+        };
+
         var result = HotelTestData.Bookings
             .GroupBy(booking => booking.Client)
             .Select(group => new
@@ -153,25 +183,11 @@ public class HotelTests
             .ToList();
 
         Assert.Equal(
-            new[]
-            {
-                "Васильева Виктория Андреевна",
-                "Захаров Захар Денисович",
-                "Громов Георгий Иванович",
-                "Иванова Ирина Павловна",
-                "Белов Борис Сергеевич"
-            },
+            expectedClients,
             result.Select(x => x.Client.FullName).ToArray());
 
         Assert.Equal(
-            new[]
-            {
-                106000m,
-                95000m,
-                89000m,
-                47500m,
-                32700m
-            },
+            expectedCosts,
             result.Select(x => x.TotalCost).ToArray());
     }
 }

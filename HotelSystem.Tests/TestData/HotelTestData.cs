@@ -3,8 +3,14 @@ using HotelSystem.Domain.Models;
 
 namespace HotelSystem.Tests.TestData;
 
+/// <summary>
+/// Тестовые данные для гостиничной системы
+/// </summary>
 public static class HotelTestData
 {
+    /// <summary>
+    /// Список типов гостиничных номеров
+    /// </summary>
     public static List<RoomType> RoomTypes { get; } =
     [
         new()
@@ -99,6 +105,9 @@ public static class HotelTestData
         }
     ];
 
+    /// <summary>
+    /// Список гостиничных номеров
+    /// </summary>
     public static List<Room> Rooms { get; } =
     [
         new() { RoomNumber = 101, Floor = 1, HasBalcony = false, RoomType = RoomTypes[0] },
@@ -113,6 +122,9 @@ public static class HotelTestData
         new() { RoomNumber = 401, Floor = 4, HasBalcony = false, RoomType = RoomTypes[9] }
     ];
 
+    /// <summary>
+    /// Список клиентов гостиницы
+    /// </summary>
     public static List<Client> Clients { get; } =
     [
         new()
@@ -187,6 +199,9 @@ public static class HotelTestData
         }
     ];
 
+    /// <summary>
+    /// Список бронирований гостиничных номеров
+    /// </summary>
     public static List<Booking> Bookings { get; } =
     [
         new()
