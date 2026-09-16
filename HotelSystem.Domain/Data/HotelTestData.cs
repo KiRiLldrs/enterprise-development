@@ -110,19 +110,19 @@ public static class HotelTestData
     /// </summary>
     public static List<Room> Rooms { get; } =
     [
-        new() { RoomNumber = 101, Floor = 1, HasBalcony = false, RoomType = RoomTypes[0] },
-        new() { RoomNumber = 102, Floor = 1, HasBalcony = true, RoomType = RoomTypes[1] },
-        new() { RoomNumber = 103, Floor = 1, HasBalcony = true, RoomType = RoomTypes[2] },
+        new() { Id = 1, RoomNumber = 101, Floor = 1, HasBalcony = false, RoomType = RoomTypes[0] },
+        new() { Id = 2, RoomNumber = 102, Floor = 1, HasBalcony = true, RoomType = RoomTypes[1] },
+        new() { Id = 3, RoomNumber = 103, Floor = 1, HasBalcony = true, RoomType = RoomTypes[2] },
 
-        new() { RoomNumber = 201, Floor = 2, HasBalcony = false, RoomType = RoomTypes[0] },
-        new() { RoomNumber = 202, Floor = 2, HasBalcony = true, RoomType = RoomTypes[1] },
-        new() { RoomNumber = 203, Floor = 2, HasBalcony = true, RoomType = RoomTypes[2] },
+        new() { Id = 4, RoomNumber = 201, Floor = 2, HasBalcony = false, RoomType = RoomTypes[0] },
+        new() { Id = 5, RoomNumber = 202, Floor = 2, HasBalcony = true, RoomType = RoomTypes[1] },
+        new() { Id = 6, RoomNumber = 203, Floor = 2, HasBalcony = true, RoomType = RoomTypes[2] },
 
-        new() { RoomNumber = 301, Floor = 3, HasBalcony = false, RoomType = RoomTypes[3] },
-        new() { RoomNumber = 302, Floor = 3, HasBalcony = true, RoomType = RoomTypes[4] },
-        new() { RoomNumber = 303, Floor = 3, HasBalcony = true, RoomType = RoomTypes[5] },
+        new() { Id = 7, RoomNumber = 301, Floor = 3, HasBalcony = false, RoomType = RoomTypes[3] },
+        new() { Id = 8, RoomNumber = 302, Floor = 3, HasBalcony = true, RoomType = RoomTypes[4] },
+        new() { Id = 9, RoomNumber = 303, Floor = 3, HasBalcony = true, RoomType = RoomTypes[5] },
 
-        new() { RoomNumber = 401, Floor = 4, HasBalcony = false, RoomType = RoomTypes[3] }
+        new() { Id = 10, RoomNumber = 401, Floor = 4, HasBalcony = false, RoomType = RoomTypes[3] }
     ];
 
     /// <summary>
@@ -132,6 +132,7 @@ public static class HotelTestData
     [
         new()
     {
+        Id = 1,
         PassportNumber = "AA100001",
         LastName = "Александров",
         FirstName = "Алексей",
@@ -141,6 +142,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 2,
         PassportNumber = "AA100002",
         LastName = "Белов",
         FirstName = "Борис",
@@ -150,6 +152,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 3,
         PassportNumber = "AA100003",
         LastName = "Васильева",
         FirstName = "Виктория",
@@ -159,6 +162,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 4,
         PassportNumber = "AA100004",
         LastName = "Громов",
         FirstName = "Георгий",
@@ -168,6 +172,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 5,
         PassportNumber = "AA100005",
         LastName = "Дмитриева",
         FirstName = "Дарья",
@@ -177,6 +182,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 6,
         PassportNumber = "AA100006",
         LastName = "Егоров",
         FirstName = "Евгений",
@@ -186,6 +192,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 7,
         PassportNumber = "AA100007",
         LastName = "Жукова",
         FirstName = "Жанна",
@@ -195,6 +202,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 8,
         PassportNumber = "AA100008",
         LastName = "Захаров",
         FirstName = "Захар",
@@ -204,6 +212,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 9,
         PassportNumber = "AA100009",
         LastName = "Ван Дам",
         FirstName = "Ирина",
@@ -213,6 +222,7 @@ public static class HotelTestData
     },
     new()
     {
+        Id = 10,
         PassportNumber = "AA100010",
         LastName = "Кузнецов",
         FirstName = "Кирилл",

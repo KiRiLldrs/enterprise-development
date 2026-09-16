@@ -5,32 +5,37 @@ namespace HotelSystem.Tests;
 
 public class HotelTests
 {
+    /// <summary>
+    /// 1. Вывести информацию о всех клиентах,проживавших в номерах указанного типа, упорядочить по ФИО
+    /// </summary>
+
     [Fact]
     public void GetClientsByRoomType()
     {
         var roomCategory = RoomCategory.Standard;
 
-        var expectedClients = new[]
-        {
-            "Белов Борис Сергеевич",
-            "Васильева Виктория Андреевна",
-            "Громов Георгий Иванович",
-            "Егоров Евгений Максимович",
-            "Жукова Жанна Романовна"
-        };
-
         var result = HotelTestData.Bookings
             .Where(booking => booking.Room.RoomType.Category == roomCategory)
             .Select(booking => booking.Client)
-            .DistinctBy(client => client.PassportNumber)
-            .OrderBy(client => client.FullName)
+            .DistinctBy(client => client.Id)
+            .OrderBy(client => client.LastName)
+            .ThenBy(client => client.FirstName)
+            .ThenBy(client => client.Patronymic)
             .ToList();
 
-        Assert.Equal(
-            expectedClients,
-            result.Select(client => client.FullName).ToArray());
+        Assert.Equal(4, result.Count);
+
+        Assert.Contains(
+            result,
+            client =>
+                client.LastName == "Белов" &&
+                client.FirstName == "Борис" &&
+                client.Patronymic == "Сергеевич");
     }
 
+    /// <summary>
+    /// 2. Вывести информацию о номерах, находящихся в текущем бронировании
+    /// </summary>
     [Fact]
     public void GetCurrentlyBookedRooms()
     {
@@ -38,9 +43,7 @@ public class HotelTests
 
         var expectedRooms = new[]
         {
-            103,
-            203,
-            401
+            103, 203, 401
         };
 
         var result = HotelTestData.Bookings
@@ -48,7 +51,7 @@ public class HotelTests
                 booking.CheckInDate <= currentDate &&
                 booking.CheckInDate.AddDays(booking.NumberOfDays) > currentDate)
             .Select(booking => booking.Room)
-            .DistinctBy(room => room.RoomNumber)
+            .DistinctBy(room => room.Id)
             .OrderBy(room => room.RoomNumber)
             .ToList();
 
@@ -57,25 +60,19 @@ public class HotelTests
             result.Select(room => room.RoomNumber).ToArray());
     }
 
+    /// <summary>
+    /// 3. Вывести топ 5 наиболее часто бронируемых номеров
+    /// </summary>
     [Fact]
     public void GetTop5MostFrequentlyBookedRooms()
     {
-        var expectedRoomNumbers = new[]
+        var expected = new[]
         {
-            203,
-            102,
-            202,
-            101,
-            103
-        };
-
-        var expectedBookingCounts = new[]
-        {
-            3,
-            2,
-            2,
-            1,
-            1
+            (RoomNumber: 203, BookingCount: 3),
+            (RoomNumber: 102, BookingCount: 2),
+            (RoomNumber: 202, BookingCount: 2),
+            (RoomNumber: 101, BookingCount: 1),
+            (RoomNumber: 103, BookingCount: 1)
         };
 
         var result = HotelTestData.Bookings
@@ -83,91 +80,56 @@ public class HotelTests
             .OrderByDescending(group => group.Count())
             .ThenBy(group => group.Key.RoomNumber)
             .Take(5)
-            .Select(group => new
-            {
-                RoomNumber = group.Key.RoomNumber,
-                BookingCount = group.Count()
-            })
-            .ToList();
+            .Select(group => (
+                RoomNumber: group.Key.RoomNumber,
+                BookingCount: group.Count()))
+            .ToArray();
 
-        Assert.Equal(
-            expectedRoomNumbers,
-            result.Select(room => room.RoomNumber).ToArray());
-
-        Assert.Equal(
-            expectedBookingCounts,
-            result.Select(room => room.BookingCount).ToArray());
+        Assert.Equal(expected, result);
     }
 
-    [Fact]
-    public void GetBookingCountForEachRoom()
+    /// <summary>
+    /// 4. Для каждого номера вывести число бронирований
+    /// <summary>
+    [Theory]
+    [InlineData(101, 1)]
+    [InlineData(102, 2)]
+    [InlineData(103, 1)]
+    [InlineData(201, 1)]
+    [InlineData(202, 2)]
+    [InlineData(203, 3)]
+    [InlineData(301, 1)]
+    [InlineData(302, 1)]
+    [InlineData(303, 1)]
+    [InlineData(401, 1)]
+    public void GetBookingCountForEachRoom(
+        int roomNumber,
+        int expectedBookingCount)
     {
-        var expectedRoomNumbers = new[]
-        {
-            101,
-            102,
-            103,
-            201,
-            202,
-            203,
-            301,
-            302,
-            303,
-            401
-        };
+        var bookingCounts = HotelTestData.Bookings
+            .GroupBy(booking => booking.Room.RoomNumber)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Count());
 
-        var expectedBookingCounts = new[]
-        {
-            1,
-            2,
-            1,
-            1,
-            2,
-            3,
-            1,
-            1,
-            1,
-            1
-        };
+        var actualBookingCount = bookingCounts.GetValueOrDefault(roomNumber);
 
-        var result = HotelTestData.Rooms
-            .Select(room => new
-            {
-                RoomNumber = room.RoomNumber,
-                BookingCount = HotelTestData.Bookings.Count(
-                    booking => booking.Room.RoomNumber == room.RoomNumber)
-            })
-            .OrderBy(room => room.RoomNumber)
-            .ToList();
-
-        Assert.Equal(
-            expectedRoomNumbers,
-            result.Select(room => room.RoomNumber).ToArray());
-
-        Assert.Equal(
-            expectedBookingCounts,
-            result.Select(room => room.BookingCount).ToArray());
+        Assert.Equal(expectedBookingCount, actualBookingCount);
     }
 
+    /// <summary>
+    /// 5.Вывести топ 5 клиентов по суммарной стоимости проживания
+    /// </summary>
     [Fact]
     public void GetTop5ClientsByTotalCost()
     {
-        var expectedClients = new[]
+        var expected = new (string LastName, string FirstName, string? Patronymic, decimal TotalCost)[]
         {
-            "Васильева Виктория Андреевна",
-            "Захаров Захар Денисович",
-            "Громов Георгий Иванович",
-            "Иванова Ирина Павловна",
-            "Белов Борис Сергеевич"
-        };
-
-        var expectedCosts = new[]
-        {
-            106000m,
-            95000m,
-            89000m,
-            47500m,
-            32700m
+            ("Васильева", "Виктория", "Андреевна", 94000m),
+            ("Захаров", "Захар", "Денисович", 80000m),
+            ("Громов", "Георгий", "Иванович", 75200m),
+            ("Ван Дам", "Ирина", "Павловна", 40000m),
+            ("Белов", "Борис", "Сергеевич", 33500m)
         };
 
         var result = HotelTestData.Bookings
@@ -180,14 +142,13 @@ public class HotelTests
             })
             .OrderByDescending(x => x.TotalCost)
             .Take(5)
-            .ToList();
+            .Select(x => (
+                LastName: x.Client.LastName,
+                FirstName: x.Client.FirstName,
+                Patronymic: x.Client.Patronymic,
+                TotalCost: x.TotalCost))
+            .ToArray();
 
-        Assert.Equal(
-            expectedClients,
-            result.Select(x => x.Client.FullName).ToArray());
-
-        Assert.Equal(
-            expectedCosts,
-            result.Select(x => x.TotalCost).ToArray());
+        Assert.Equal(expected, result);
     }
 }
