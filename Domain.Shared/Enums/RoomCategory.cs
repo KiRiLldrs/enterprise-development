@@ -1,4 +1,4 @@
-namespace HotelSystem.Domain.Enums;
+namespace Domain.Shared.Enums;
 
 /// <summary>
 /// Категория гостиничного номера
@@ -18,5 +18,15 @@ public enum RoomCategory
     /// <summary>
     /// Люкс
     /// </summary>
-    Luxury = 2
+    Luxury = 2,
+
+    /// <summary>
+    /// Комфорт
+    /// </summary>
+    Comfort = 3,
+
+    /// <summary>
+    /// Президентский номер
+    /// </summary>
+    Presidential = 4
 }

@@ -1,4 +1,4 @@
-using HotelSystem.Domain.Enums;
+using Domain.Shared.Enums;
 using HotelSystem.Domain.Models;
 
 namespace HotelSystem.Domain.Data;
