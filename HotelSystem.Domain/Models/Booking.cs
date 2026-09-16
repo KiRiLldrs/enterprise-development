@@ -6,6 +6,11 @@ namespace HotelSystem.Domain.Models;
 public class Booking
 {
     /// <summary>
+    /// Уникальный идентификатор бронирования
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
     /// Клиент, оформивший бронирование
     /// </summary>
     public required Client Client { get; set; }
