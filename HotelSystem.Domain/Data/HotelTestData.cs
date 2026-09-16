@@ -1,7 +1,7 @@
 using HotelSystem.Domain.Enums;
 using HotelSystem.Domain.Models;
 
-namespace HotelSystem.Tests.TestData;
+namespace HotelSystem.Domain.Data;
 
 /// <summary>
 /// Тестовые данные для гостиничной системы

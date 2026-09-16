@@ -1,5 +1,5 @@
 using HotelSystem.Domain.Enums;
-using HotelSystem.Tests.TestData;
+using HotelSystem.Domain.Data;
 
 namespace HotelSystem.Tests;
 
