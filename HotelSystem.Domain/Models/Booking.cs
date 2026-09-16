@@ -24,4 +24,10 @@ public class Booking
     /// Количество дней проживания
     /// </summary>
     public int NumberOfDays { get; set; }
+
+    /// <summary>
+    /// Полная стоимость проживания
+    /// </summary>
+    public decimal TotalCost =>
+        Room.RoomType.PricePerDay * NumberOfDays;
 }
