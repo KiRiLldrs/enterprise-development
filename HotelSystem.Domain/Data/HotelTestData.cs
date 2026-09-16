@@ -113,13 +113,16 @@ public static class HotelTestData
         new() { RoomNumber = 101, Floor = 1, HasBalcony = false, RoomType = RoomTypes[0] },
         new() { RoomNumber = 102, Floor = 1, HasBalcony = true, RoomType = RoomTypes[1] },
         new() { RoomNumber = 103, Floor = 1, HasBalcony = true, RoomType = RoomTypes[2] },
-        new() { RoomNumber = 201, Floor = 2, HasBalcony = false, RoomType = RoomTypes[3] },
-        new() { RoomNumber = 202, Floor = 2, HasBalcony = true, RoomType = RoomTypes[4] },
-        new() { RoomNumber = 203, Floor = 2, HasBalcony = true, RoomType = RoomTypes[5] },
-        new() { RoomNumber = 301, Floor = 3, HasBalcony = false, RoomType = RoomTypes[6] },
-        new() { RoomNumber = 302, Floor = 3, HasBalcony = true, RoomType = RoomTypes[7] },
-        new() { RoomNumber = 303, Floor = 3, HasBalcony = true, RoomType = RoomTypes[8] },
-        new() { RoomNumber = 401, Floor = 4, HasBalcony = false, RoomType = RoomTypes[9] }
+
+        new() { RoomNumber = 201, Floor = 2, HasBalcony = false, RoomType = RoomTypes[0] },
+        new() { RoomNumber = 202, Floor = 2, HasBalcony = true, RoomType = RoomTypes[1] },
+        new() { RoomNumber = 203, Floor = 2, HasBalcony = true, RoomType = RoomTypes[2] },
+
+        new() { RoomNumber = 301, Floor = 3, HasBalcony = false, RoomType = RoomTypes[3] },
+        new() { RoomNumber = 302, Floor = 3, HasBalcony = true, RoomType = RoomTypes[4] },
+        new() { RoomNumber = 303, Floor = 3, HasBalcony = true, RoomType = RoomTypes[5] },
+
+        new() { RoomNumber = 401, Floor = 4, HasBalcony = false, RoomType = RoomTypes[3] }
     ];
 
     /// <summary>
@@ -128,75 +131,95 @@ public static class HotelTestData
     public static List<Client> Clients { get; } =
     [
         new()
-        {
-            PassportNumber = "AA100001",
-            FullName = "Александров Алексей Петрович",
-            BirthDate = new DateTime(1995, 3, 12),
-            Citizenship = "Россия"
-        },
-        new()
-        {
-            PassportNumber = "AA100002",
-            FullName = "Белов Борис Сергеевич",
-            BirthDate = new DateTime(1988, 7, 24),
-            Citizenship = "Россия"
-        },
-        new()
-        {
-            PassportNumber = "AA100003",
-            FullName = "Васильева Виктория Андреевна",
-            BirthDate = new DateTime(1999, 11, 5),
-            Citizenship = "Россия"
-        },
-        new()
-        {
-            PassportNumber = "AA100004",
-            FullName = "Громов Георгий Иванович",
-            BirthDate = new DateTime(1992, 1, 18),
-            Citizenship = "Беларусь"
-        },
-        new()
-        {
-            PassportNumber = "AA100005",
-            FullName = "Дмитриева Дарья Олеговна",
-            BirthDate = new DateTime(2001, 6, 30),
-            Citizenship = "Россия"
-        },
-        new()
-        {
-            PassportNumber = "AA100006",
-            FullName = "Егоров Евгений Максимович",
-            BirthDate = new DateTime(1985, 9, 14),
-            Citizenship = "Казахстан"
-        },
-        new()
-        {
-            PassportNumber = "AA100007",
-            FullName = "Жукова Жанна Романовна",
-            BirthDate = new DateTime(1997, 2, 22),
-            Citizenship = "Россия"
-        },
-        new()
-        {
-            PassportNumber = "AA100008",
-            FullName = "Захаров Захар Денисович",
-            BirthDate = new DateTime(1990, 12, 8),
-            Citizenship = "Армения"
-        },
-        new()
-        {
-            PassportNumber = "AA100009",
-            FullName = "Иванова Ирина Павловна",
-            BirthDate = new DateTime(1996, 4, 17),
-            Citizenship = "Россия"
-        },
-        new()
-        {
-            PassportNumber = "AA100010",
-            FullName = "Кузнецов Кирилл Александрович",
-            BirthDate = new DateTime(1993, 8, 27),
-            Citizenship = "Россия"
-        }
+    {
+        PassportNumber = "AA100001",
+        LastName = "Александров",
+        FirstName = "Алексей",
+        Patronymic = "Петрович",
+        BirthDate = new DateTime(1995, 3, 12),
+        Citizenship = "Россия"
+    },
+    new()
+    {
+        PassportNumber = "AA100002",
+        LastName = "Белов",
+        FirstName = "Борис",
+        Patronymic = "Сергеевич",
+        BirthDate = new DateTime(1988, 7, 24),
+        Citizenship = "Россия"
+    },
+    new()
+    {
+        PassportNumber = "AA100003",
+        LastName = "Васильева",
+        FirstName = "Виктория",
+        Patronymic = "Андреевна",
+        BirthDate = new DateTime(1999, 11, 5),
+        Citizenship = "Россия"
+    },
+    new()
+    {
+        PassportNumber = "AA100004",
+        LastName = "Громов",
+        FirstName = "Георгий",
+        Patronymic = "Иванович",
+        BirthDate = new DateTime(1992, 1, 18),
+        Citizenship = "Беларусь"
+    },
+    new()
+    {
+        PassportNumber = "AA100005",
+        LastName = "Дмитриева",
+        FirstName = "Дарья",
+        Patronymic = "Олеговна",
+        BirthDate = new DateTime(2001, 6, 30),
+        Citizenship = "Россия"
+    },
+    new()
+    {
+        PassportNumber = "AA100006",
+        LastName = "Егоров",
+        FirstName = "Евгений",
+        Patronymic = "Максимович",
+        BirthDate = new DateTime(1985, 9, 14),
+        Citizenship = "Казахстан"
+    },
+    new()
+    {
+        PassportNumber = "AA100007",
+        LastName = "Жукова",
+        FirstName = "Жанна",
+        Patronymic = "Романовна",
+        BirthDate = new DateTime(1997, 2, 22),
+        Citizenship = "Россия"
+    },
+    new()
+    {
+        PassportNumber = "AA100008",
+        LastName = "Захаров",
+        FirstName = "Захар",
+        Patronymic = "Денисович",
+        BirthDate = new DateTime(1990, 12, 8),
+        Citizenship = "Армения"
+    },
+    new()
+    {
+        PassportNumber = "AA100009",
+        LastName = "Ван Дам",
+        FirstName = "Ирина",
+        Patronymic = "Павловна",
+        BirthDate = new DateTime(1996, 4, 17),
+        Citizenship = "Россия"
+    },
+    new()
+    {
+        PassportNumber = "AA100010",
+        LastName = "Кузнецов",
+        FirstName = "Кирилл",
+        Patronymic = null,
+        BirthDate = new DateTime(1993, 8, 27),
+        Citizenship = "Россия"
+    }
     ];
 
     /// <summary>
