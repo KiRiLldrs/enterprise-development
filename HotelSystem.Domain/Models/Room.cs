@@ -6,6 +6,11 @@ namespace HotelSystem.Domain.Models;
 public class Room
 {
     /// <summary>
+    /// Уникальный идентификатор номера
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
     /// Номер комнаты
     /// </summary>
     public int RoomNumber { get; set; }
