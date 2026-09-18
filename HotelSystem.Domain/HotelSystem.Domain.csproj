@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain.Shared\Domain.Shared.csproj" />
+    <ProjectReference Include="..\HotelSystem.Domain.Shared\HotelSystem.Domain.Shared.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

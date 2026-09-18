@@ -1,4 +1,4 @@
-using Domain.Shared.Enums;
+using HotelSystem.Domain.Shared.Enums;
 using HotelSystem.Domain.Data;
 
 namespace HotelSystem.Tests;
@@ -137,8 +137,7 @@ public class HotelTests
             .Select(group => new
             {
                 Client = group.Key,
-                TotalCost = group.Sum(booking =>
-                    booking.Room.RoomType.PricePerDay * booking.NumberOfDays)
+                TotalCost = group.Sum(booking => booking.TotalCost)
             })
             .OrderByDescending(x => x.TotalCost)
             .Take(5)
