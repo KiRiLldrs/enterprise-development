@@ -4,23 +4,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HotelSystem.Server.Controllers;
 
+/// <summary>
+/// Контроллер для выполнения CRUD-операций с клиентами гостиницы
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class ClientsController : ControllerBase
 {
     private readonly ClientService _clientService;
 
+    /// <summary>
+    /// Инициализирует контроллер клиентов
+    /// </summary>
     public ClientsController(ClientService clientService)
     {
         _clientService = clientService;
     }
 
+    /// <summary>
+    /// Возвращает список всех клиентов
+    /// </summary>
     [HttpGet]
     public IActionResult GetClients()
     {
         return Ok(_clientService.GetAll());
     }
 
+    /// <summary>
+    /// Возвращает клиента по его идентификатору
+    /// </summary>
     [HttpGet("{id:int}")]
     public IActionResult GetClient(int id)
     {
@@ -34,6 +46,9 @@ public class ClientsController : ControllerBase
         return Ok(client);
     }
 
+    /// <summary>
+    /// Создаёт нового клиента
+    /// </summary>
     [HttpPost]
     public IActionResult CreateClient(Client client)
     {
@@ -45,6 +60,9 @@ public class ClientsController : ControllerBase
             createdClient);
     }
 
+    /// <summary>
+    /// Обновляет данные существующего клиента
+    /// </summary>
     [HttpPut("{id:int}")]
     public IActionResult UpdateClient(int id, Client client)
     {
@@ -58,6 +76,9 @@ public class ClientsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Удаляет клиента по его идентификатору
+    /// </summary>
     [HttpDelete("{id:int}")]
     public IActionResult DeleteClient(int id)
     {
