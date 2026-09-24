@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="HotelSystem.Domain.Shared/HotelSystem.Domain.Shared.csproj" />
   <Project Path="HotelSystem.Domain/HotelSystem.Domain.csproj" />
+  <Project Path="HotelSystem.Server/HotelSystem.Server.csproj" />
   <Project Path="HotelSystem.Tests/HotelSystem.Tests.csproj" />
 </Solution>
