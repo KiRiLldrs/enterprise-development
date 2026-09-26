@@ -239,6 +239,7 @@ public static class HotelTestData
     [
         new()
         {
+            Id = 1,
             Client = Clients[0],
             Room = Rooms[0],
             CheckInDate = new DateTime(2026, 9, 1),
@@ -246,6 +247,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 2,
             Client = Clients[1],
             Room = Rooms[1],
             CheckInDate = new DateTime(2026, 9, 2),
@@ -253,6 +255,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 3,
             Client = Clients[2],
             Room = Rooms[1],
             CheckInDate = new DateTime(2026, 8, 20),
@@ -260,6 +263,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 4,
             Client = Clients[3],
             Room = Rooms[2],
             CheckInDate = new DateTime(2026, 9, 5),
@@ -267,6 +271,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 5,
             Client = Clients[4],
             Room = Rooms[3],
             CheckInDate = new DateTime(2026, 8, 15),
@@ -274,6 +279,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 6,
             Client = Clients[5],
             Room = Rooms[4],
             CheckInDate = new DateTime(2026, 8, 25),
@@ -281,6 +287,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 7,
             Client = Clients[6],
             Room = Rooms[4],
             CheckInDate = new DateTime(2026, 9, 3),
@@ -288,6 +295,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 8,
             Client = Clients[7],
             Room = Rooms[5],
             CheckInDate = new DateTime(2026, 8, 10),
@@ -295,6 +303,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 9,
             Client = Clients[8],
             Room = Rooms[5],
             CheckInDate = new DateTime(2026, 9, 4),
@@ -302,6 +311,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 10,
             Client = Clients[9],
             Room = Rooms[5],
             CheckInDate = new DateTime(2026, 9, 8),
@@ -309,6 +319,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 11,
             Client = Clients[0],
             Room = Rooms[6],
             CheckInDate = new DateTime(2026, 8, 1),
@@ -316,6 +327,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 12,
             Client = Clients[1],
             Room = Rooms[7],
             CheckInDate = new DateTime(2026, 8, 5),
@@ -323,6 +335,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 13,
             Client = Clients[2],
             Room = Rooms[8],
             CheckInDate = new DateTime(2026, 7, 20),
@@ -330,6 +343,7 @@ public static class HotelTestData
         },
         new()
         {
+            Id = 14,
             Client = Clients[3],
             Room = Rooms[9],
             CheckInDate = new DateTime(2026, 9, 7),
