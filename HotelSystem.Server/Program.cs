@@ -6,6 +6,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddSingleton<ClientService>();
 builder.Services.AddSingleton<RoomTypeService>();
+builder.Services.AddSingleton<RoomService>();
 
 var app = builder.Build();
 
