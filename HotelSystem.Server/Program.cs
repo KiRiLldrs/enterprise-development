@@ -8,6 +8,7 @@ builder.Services.AddSingleton<ClientService>();
 builder.Services.AddSingleton<RoomTypeService>();
 builder.Services.AddSingleton<RoomService>();
 builder.Services.AddSingleton<BookingService>();
+builder.Services.AddSingleton<AnalyticsService>();
 
 var app = builder.Build();
 
