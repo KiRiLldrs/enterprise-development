@@ -44,7 +44,6 @@ public class AnalyticsService
     /// <summary>
     /// 3. Вывести топ 5 наиболее часто бронируемых номеров
     /// </summary>
-    /// <summary>
     public object GetTop5MostFrequentlyBookedRooms()
     {
         return HotelTestData.Bookings
@@ -62,7 +61,7 @@ public class AnalyticsService
 
     /// <summary>
     /// 4. Для каждого номера вывести число бронирований
-    /// <summary>
+    /// </summary>
     public Dictionary<int, int> GetBookingCountForEachRoom()
     {
         return HotelTestData.Bookings
