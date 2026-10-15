@@ -1,77 +1,128 @@
+using HotelSystem.Application.Contracts.Bookings;
+using HotelSystem.Application.Services;
 using HotelSystem.Domain.Models;
-using HotelSystem.Server.Services;
 using Microsoft.AspNetCore.Mvc;
-
-namespace HotelSystem.Server.Controllers;
 
 /// <summary>
 /// Контроллер для выполнения CRUD-операций с бронированиями гостиницы
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class BookingsController : ControllerBase
+public class BookingsController(
+    BookingService bookingService,
+    ClientService clientService,
+    RoomService roomService) : ControllerBase
 {
-    private readonly BookingService _bookingService;
-
-    /// <summary>
-    /// Инициализирует контроллер бронирований
-    /// </summary>
-    public BookingsController(BookingService bookingService)
-    {
-        _bookingService = bookingService;
-    }
-
     /// <summary>
     /// Возвращает список всех бронирований
     /// </summary>
     [HttpGet]
-    public IActionResult GetBookings()
+    [ProducesResponseType(typeof(List<BookingResponse>), StatusCodes.Status200OK)]
+    public ActionResult<List<BookingResponse>> GetBookings()
     {
-        return Ok(_bookingService.GetAll());
+        var bookings = bookingService.GetAll()
+            .Select(ToResponse)
+            .ToList();
+
+        return Ok(bookings);
     }
 
     /// <summary>
     /// Возвращает бронирование по его идентификатору
     /// </summary>
     [HttpGet("{id:int}")]
-    public IActionResult GetBooking(int id)
+    [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<BookingResponse> GetBooking(int id)
     {
-        var booking = _bookingService.GetById(id);
+        var booking = bookingService.GetById(id);
 
         if (booking is null)
         {
             return NotFound();
         }
 
-        return Ok(booking);
+        return Ok(ToResponse(booking));
     }
 
     /// <summary>
     /// Создаёт новое бронирование
     /// </summary>
     [HttpPost]
-    public IActionResult CreateBooking(Booking booking)
+    [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<BookingResponse> CreateBooking(CreateBookingRequest request)
     {
-        var createdBooking = _bookingService.Add(booking);
+        var client = clientService.GetById(request.ClientId);
+
+        if (client is null)
+        {
+            return BadRequest("Клиент с указанным идентификатором не найден.");
+        }
+
+        var room = roomService.GetById(request.RoomId);
+
+        if (room is null)
+        {
+            return BadRequest("Номер с указанным идентификатором не найден.");
+        }
+
+        var booking = new Booking
+        {
+            Client = client,
+            Room = room,
+            CheckInDate = request.CheckInDate,
+            NumberOfDays = request.NumberOfDays
+        };
+
+        var createdBooking = bookingService.Add(booking);
 
         return CreatedAtAction(
             nameof(GetBooking),
             new { id = createdBooking.Id },
-            createdBooking);
+            ToResponse(createdBooking));
     }
 
     /// <summary>
     /// Обновляет данные существующего бронирования
     /// </summary>
     [HttpPut("{id:int}")]
-    public IActionResult UpdateBooking(int id, Booking booking)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult UpdateBooking(int id, UpdateBookingRequest request)
     {
-        var updated = _bookingService.Update(id, booking);
+        var existingBooking = bookingService.GetById(id);
 
-        if (!updated)
+        if (existingBooking is null)
         {
             return NotFound();
         }
+
+        var client = clientService.GetById(request.ClientId);
+
+        if (client is null)
+        {
+            return BadRequest("Клиент с указанным идентификатором не найден.");
+        }
+
+        var room = roomService.GetById(request.RoomId);
+
+        if (room is null)
+        {
+            return BadRequest("Номер с указанным идентификатором не найден.");
+        }
+
+        var booking = new Booking
+        {
+            Id = id,
+            Client = client,
+            Room = room,
+            CheckInDate = request.CheckInDate,
+            NumberOfDays = request.NumberOfDays
+        };
+
+        bookingService.Update(id, booking);
 
         return NoContent();
     }
@@ -80,15 +131,21 @@ public class BookingsController : ControllerBase
     /// Удаляет бронирование по его идентификатору
     /// </summary>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteBooking(int id)
     {
-        var deleted = _bookingService.Delete(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
+        bookingService.Delete(id);
 
         return NoContent();
     }
+
+    private static BookingResponse ToResponse(Booking booking) => new()
+    {
+        Id = booking.Id,
+        ClientId = booking.Client.Id,
+        RoomId = booking.Room.Id,
+        CheckInDate = booking.CheckInDate,
+        NumberOfDays = booking.NumberOfDays,
+        TotalCost = booking.TotalCost
+    };
 }
