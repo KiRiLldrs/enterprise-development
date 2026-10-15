@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HotelSystem.Domain\HotelSystem.Domain.csproj" />
     <ProjectReference Include="..\HotelSystem.Domain.Shared\HotelSystem.Domain.Shared.csproj" />
+    <ProjectReference Include="..\HotelSystem.Application.Contracts\HotelSystem.Application.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

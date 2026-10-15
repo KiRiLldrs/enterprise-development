@@ -3,14 +3,14 @@ using HotelSystem.Application.Services;
 using HotelSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HotelSystem.Server.Controllers;
-
 /// <summary>
 /// Контроллер для выполнения CRUD-операций с клиентами гостиницы
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ClientsController(ClientService clientService) : ControllerBase
+public class ClientsController(
+    ClientService clientService,
+    ILogger<ClientsController> logger) : ControllerBase
 {
     /// <summary>
     /// Возвращает список всех клиентов
@@ -19,6 +19,8 @@ public class ClientsController(ClientService clientService) : ControllerBase
     [ProducesResponseType(typeof(List<ClientResponse>), StatusCodes.Status200OK)]
     public ActionResult<List<ClientResponse>> GetClients()
     {
+        logger.LogInformation("Получение списка клиентов");
+
         var clients = clientService.GetAll()
             .Select(ToResponse)
             .ToList();
@@ -34,10 +36,18 @@ public class ClientsController(ClientService clientService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<ClientResponse> GetClient(int id)
     {
+        logger.LogInformation(
+            "Поиск клиента с идентификатором {ClientId}.",
+            id);
+
         var client = clientService.GetById(id);
 
         if (client is null)
         {
+            logger.LogWarning(
+                "Клиент с идентификатором {ClientId} не найден",
+                id);
+
             return NotFound();
         }
 
@@ -52,6 +62,8 @@ public class ClientsController(ClientService clientService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<ClientResponse> CreateClient(CreateClientRequest request)
     {
+        logger.LogInformation("Создание нового клиента");
+
         var client = new Client
         {
             PassportNumber = request.PassportNumber,
@@ -63,6 +75,10 @@ public class ClientsController(ClientService clientService) : ControllerBase
         };
 
         var createdClient = clientService.Add(client);
+
+        logger.LogInformation(
+            "Создан клиент с идентификатором {ClientId}",
+            createdClient.Id);
 
         return CreatedAtAction(
             nameof(GetClient),
@@ -79,6 +95,10 @@ public class ClientsController(ClientService clientService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult UpdateClient(int id, UpdateClientRequest request)
     {
+        logger.LogInformation(
+            "Обновление клиента с идентификатором {ClientId}",
+            id);
+
         var client = new Client
         {
             PassportNumber = request.PassportNumber,
@@ -93,8 +113,16 @@ public class ClientsController(ClientService clientService) : ControllerBase
 
         if (!updated)
         {
+            logger.LogWarning(
+                "Не удалось обновить клиента с идентификатором {ClientId}: клиент не найден",
+                id);
+
             return NotFound();
         }
+
+        logger.LogInformation(
+            "Клиент с идентификатором {ClientId} обновлён",
+            id);
 
         return NoContent();
     }
@@ -106,22 +134,36 @@ public class ClientsController(ClientService clientService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteClient(int id)
     {
-        clientService.Delete(id);
+        logger.LogInformation(
+            "Удаление клиента с идентификатором {ClientId}",
+            id);
+
+        var deleted = clientService.Delete(id);
+
+        if (deleted)
+        {
+            logger.LogInformation(
+                "Клиент с идентификатором {ClientId} удалён",
+                id);
+        }
+        else
+        {
+            logger.LogWarning(
+                "Клиент с идентификатором {ClientId} не найден при удалении",
+                id);
+        }
 
         return NoContent();
     }
 
-    private static ClientResponse ToResponse(Client client)
+    private static ClientResponse ToResponse(Client client) => new()
     {
-        return new ClientResponse
-        {
-            Id = client.Id,
-            PassportNumber = client.PassportNumber,
-            LastName = client.LastName,
-            FirstName = client.FirstName,
-            Patronymic = client.Patronymic,
-            BirthDate = client.BirthDate,
-            Citizenship = client.Citizenship
-        };
-    }
+        Id = client.Id,
+        PassportNumber = client.PassportNumber,
+        LastName = client.LastName,
+        FirstName = client.FirstName,
+        Patronymic = client.Patronymic,
+        BirthDate = client.BirthDate,
+        Citizenship = client.Citizenship
+    };
 }

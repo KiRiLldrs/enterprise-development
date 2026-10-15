@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class RoomsController(
     RoomService roomService,
-    RoomTypeService roomTypeService) : ControllerBase
+    RoomTypeService roomTypeService,
+    ILogger<RoomsController> logger) : ControllerBase
 {
     /// <summary>
     /// Возвращает список всех номеров гостиницы
@@ -19,6 +20,8 @@ public class RoomsController(
     [ProducesResponseType(typeof(List<RoomResponse>), StatusCodes.Status200OK)]
     public ActionResult<List<RoomResponse>> GetRooms()
     {
+        logger.LogInformation("Получение списка номеров");
+
         var rooms = roomService.GetAll()
             .Select(ToResponse)
             .ToList();
@@ -34,10 +37,18 @@ public class RoomsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<RoomResponse> GetRoom(int id)
     {
+        logger.LogInformation(
+            "Поиск номера с идентификатором {RoomId}",
+            id);
+
         var room = roomService.GetById(id);
 
         if (room is null)
         {
+            logger.LogWarning(
+                "Номер с идентификатором {RoomId} не найден",
+                id);
+
             return NotFound();
         }
 
@@ -52,11 +63,17 @@ public class RoomsController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<RoomResponse> CreateRoom(CreateRoomRequest request)
     {
+        logger.LogInformation("Создание нового номера");
+
         var roomType = roomTypeService.GetById(request.RoomTypeId);
 
         if (roomType is null)
         {
-            return BadRequest("Тип номера с указанным идентификатором не найден.");
+            logger.LogWarning(
+                "Не удалось создать номер: тип номера с идентификатором {RoomTypeId} не найден",
+                request.RoomTypeId);
+
+            return BadRequest("Тип номера с указанным идентификатором не найден");
         }
 
         var room = new Room
@@ -68,6 +85,10 @@ public class RoomsController(
         };
 
         var createdRoom = roomService.Add(room);
+
+        logger.LogInformation(
+            "Создан номер с идентификатором {RoomId}",
+            createdRoom.Id);
 
         return CreatedAtAction(
             nameof(GetRoom),
@@ -84,10 +105,18 @@ public class RoomsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult UpdateRoom(int id, UpdateRoomRequest request)
     {
+        logger.LogInformation(
+            "Обновление номера с идентификатором {RoomId}",
+            id);
+
         var existingRoom = roomService.GetById(id);
 
         if (existingRoom is null)
         {
+            logger.LogWarning(
+                "Не удалось обновить номер с идентификатором {RoomId}: номер не найден",
+                id);
+
             return NotFound();
         }
 
@@ -95,7 +124,11 @@ public class RoomsController(
 
         if (roomType is null)
         {
-            return BadRequest("Тип номера с указанным идентификатором не найден.");
+            logger.LogWarning(
+                "Не удалось обновить номер: тип номера с идентификатором {RoomTypeId} не найден",
+                request.RoomTypeId);
+
+            return BadRequest("Тип номера с указанным идентификатором не найден");
         }
 
         var room = new Room
@@ -107,7 +140,20 @@ public class RoomsController(
             RoomType = roomType
         };
 
-        roomService.Update(id, room);
+        var updated = roomService.Update(id, room);
+
+        if (!updated)
+        {
+            logger.LogWarning(
+                "Не удалось обновить номер с идентификатором {RoomId}",
+                id);
+
+            return NotFound();
+        }
+
+        logger.LogInformation(
+            "Номер с идентификатором {RoomId} обновлён",
+            id);
 
         return NoContent();
     }
@@ -119,7 +165,24 @@ public class RoomsController(
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteRoom(int id)
     {
-        roomService.Delete(id);
+        logger.LogInformation(
+            "Удаление номера с идентификатором {RoomId}",
+            id);
+
+        var deleted = roomService.Delete(id);
+
+        if (deleted)
+        {
+            logger.LogInformation(
+                "Номер с идентификатором {RoomId} удалён",
+                id);
+        }
+        else
+        {
+            logger.LogWarning(
+                "Номер с идентификатором {RoomId} не найден при удалении",
+                id);
+        }
 
         return NoContent();
     }

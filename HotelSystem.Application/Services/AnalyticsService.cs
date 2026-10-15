@@ -1,3 +1,4 @@
+using HotelSystem.Application.Contracts.Analytics;
 using HotelSystem.Application.Repositories;
 using HotelSystem.Domain.Models;
 using HotelSystem.Domain.Shared.Enums;
@@ -10,7 +11,7 @@ namespace HotelSystem.Application.Services;
 public class AnalyticsService(IBookingRepository bookingRepository)
 {
     /// <summary>
-    /// 1. Вывести информацию о клиентах, проживавших в номерах указанного типа, упорядоченных по ФИО
+    /// 1. Выводит клиентов, проживавших в номерах указанного типа, упорядоченных по ФИО
     /// </summary>
     public List<Client> GetClientsByRoomCategory(RoomCategory roomCategory)
     {
@@ -25,7 +26,7 @@ public class AnalyticsService(IBookingRepository bookingRepository)
     }
 
     /// <summary>
-    /// 2. Вывести информацию о номерах, занятых на дату проверки
+    /// 2. Выводит номера, занятые на дату проверки
     /// </summary>
     public List<Room> GetCurrentlyBookedRooms()
     {
@@ -42,16 +43,16 @@ public class AnalyticsService(IBookingRepository bookingRepository)
     }
 
     /// <summary>
-    /// 3. Вывести топ-5 наиболее часто бронируемых номеров
+    /// 3. Выводит топ-5 наиболее часто бронируемых номеров
     /// </summary>
-    public object GetTop5MostFrequentlyBookedRooms()
+    public List<TopBookedRoomResponse> GetTop5MostFrequentlyBookedRooms()
     {
         return bookingRepository.GetAll()
             .GroupBy(booking => booking.Room)
             .OrderByDescending(group => group.Count())
             .ThenBy(group => group.Key.RoomNumber)
             .Take(5)
-            .Select(group => new
+            .Select(group => new TopBookedRoomResponse
             {
                 RoomNumber = group.Key.RoomNumber,
                 BookingCount = group.Count()
@@ -60,21 +61,25 @@ public class AnalyticsService(IBookingRepository bookingRepository)
     }
 
     /// <summary>
-    /// 4. Для каждого номера вывести число бронирований
+    /// 4. Выводит количество бронирований для каждого номера
     /// </summary>
-    public Dictionary<int, int> GetBookingCountForEachRoom()
+    public List<RoomBookingCountResponse> GetBookingCountForEachRoom()
     {
         return bookingRepository.GetAll()
             .GroupBy(booking => booking.Room.RoomNumber)
-            .ToDictionary(
-                group => group.Key,
-                group => group.Count());
+            .OrderBy(group => group.Key)
+            .Select(group => new RoomBookingCountResponse
+            {
+                RoomNumber = group.Key,
+                BookingCount = group.Count()
+            })
+            .ToList();
     }
 
     /// <summary>
-    /// 5. Вывести топ-5 клиентов по суммарной стоимости проживания
+    /// 5. Выводит топ-5 клиентов по суммарной стоимости проживания
     /// </summary>
-    public object GetTop5ClientsByTotalCost()
+    public List<TopClientByCostResponse> GetTop5ClientsByTotalCost()
     {
         return bookingRepository.GetAll()
             .GroupBy(booking => booking.Client)
@@ -85,7 +90,7 @@ public class AnalyticsService(IBookingRepository bookingRepository)
             })
             .OrderByDescending(item => item.TotalCost)
             .Take(5)
-            .Select(item => new
+            .Select(item => new TopClientByCostResponse
             {
                 LastName = item.Client.LastName,
                 FirstName = item.Client.FirstName,

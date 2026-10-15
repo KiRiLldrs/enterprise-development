@@ -1,5 +1,8 @@
+using HotelSystem.Application.Contracts.Analytics;
+using HotelSystem.Application.Contracts.Clients;
+using HotelSystem.Application.Contracts.Rooms;
+using HotelSystem.Application.Services;
 using HotelSystem.Domain.Shared.Enums;
-using HotelSystem.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelSystem.Server.Controllers;
@@ -9,70 +12,104 @@ namespace HotelSystem.Server.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class AnalyticsController : ControllerBase
+public class AnalyticsController(
+    AnalyticsService analyticsService,
+    ILogger<AnalyticsController> logger) : ControllerBase
 {
-    private readonly AnalyticsService _analyticsService;
-
     /// <summary>
-    /// Инициализирует контроллер аналитики
-    /// </summary>
-    public AnalyticsController(AnalyticsService analyticsService)
-    {
-        _analyticsService = analyticsService;
-    }
-
-    /// <summary>
-    /// 1. Вывести информацию о всех клиентах,проживавших в номерах указанного типа, упорядочить по ФИО
+    /// 1. Выводит клиентов, проживавших в номерах указанного типа, упорядоченных по ФИО
     /// </summary>
     [HttpGet("clients-by-room-category/{category}")]
-    public IActionResult GetClientsByRoomCategory(RoomCategory category)
+    [ProducesResponseType(typeof(List<ClientResponse>), StatusCodes.Status200OK)]
+    public ActionResult<List<ClientResponse>> GetClientsByRoomCategory(
+        RoomCategory category)
     {
-        var clients = _analyticsService.GetClientsByRoomCategory(category);
+        logger.LogInformation(
+            "Получен запрос клиентов по категории номера {Category}",
+            category);
+
+        var clients = analyticsService.GetClientsByRoomCategory(category)
+            .Select(client => new ClientResponse
+            {
+                Id = client.Id,
+                PassportNumber = client.PassportNumber,
+                LastName = client.LastName,
+                FirstName = client.FirstName,
+                Patronymic = client.Patronymic,
+                BirthDate = client.BirthDate,
+                Citizenship = client.Citizenship
+            })
+            .ToList();
 
         return Ok(clients);
     }
 
     /// <summary>
-    /// 2. Вывести информацию о номерах, находящихся в текущем бронировании
+    /// 2. Выводит номера, занятые на дату проверки
     /// </summary>
     [HttpGet("occupied-rooms")]
-    public IActionResult GetCurrentlyBookedRooms()
+    [ProducesResponseType(typeof(List<RoomResponse>), StatusCodes.Status200OK)]
+    public ActionResult<List<RoomResponse>> GetCurrentlyBookedRooms()
     {
-        var rooms = _analyticsService.GetCurrentlyBookedRooms();
+        logger.LogInformation("Получен запрос занятых номеров");
+
+        var rooms = analyticsService.GetCurrentlyBookedRooms()
+            .Select(room => new RoomResponse
+            {
+                Id = room.Id,
+                RoomNumber = room.RoomNumber,
+                Floor = room.Floor,
+                HasBalcony = room.HasBalcony,
+                RoomTypeId = room.RoomType.Id,
+                RoomCategory = room.RoomType.Category.ToString()
+            })
+            .ToList();
 
         return Ok(rooms);
     }
 
     /// <summary>
-    /// 3. Вывести топ 5 наиболее часто бронируемых номеров
+    /// 3. Выводит топ-5 наиболее часто бронируемых номеров
     /// </summary>
     [HttpGet("top-booked-rooms")]
-    public IActionResult GetTop5MostFrequentlyBookedRooms()
+    [ProducesResponseType(
+        typeof(List<TopBookedRoomResponse>),
+        StatusCodes.Status200OK)]
+    public ActionResult<List<TopBookedRoomResponse>>
+        GetTop5MostFrequentlyBookedRooms()
     {
-        var rooms = _analyticsService.GetTop5MostFrequentlyBookedRooms();
+        logger.LogInformation("Получен запрос топ-5 бронируемых номеров");
 
-        return Ok(rooms);
+        return Ok(analyticsService.GetTop5MostFrequentlyBookedRooms());
     }
 
     /// <summary>
-    /// 4. Для каждого номера вывести число бронирований
-    /// <summary>
+    /// 4. Выводит количество бронирований для каждого номера
+    /// </summary>
     [HttpGet("booking-count-by-room")]
-    public IActionResult GetBookingCountForEachRoom()
+    [ProducesResponseType(
+        typeof(List<RoomBookingCountResponse>),
+        StatusCodes.Status200OK)]
+    public ActionResult<List<RoomBookingCountResponse>>
+        GetBookingCountForEachRoom()
     {
-        var bookingCounts = _analyticsService.GetBookingCountForEachRoom();
+        logger.LogInformation("Получен запрос количества бронирований по номерам");
 
-        return Ok(bookingCounts);
+        return Ok(analyticsService.GetBookingCountForEachRoom());
     }
 
     /// <summary>
-    /// 5.Вывести топ 5 клиентов по суммарной стоимости проживания
+    /// 5. Выводит топ-5 клиентов по суммарной стоимости проживания
     /// </summary>
     [HttpGet("top-clients-by-cost")]
-    public IActionResult GetTop5ClientsByTotalCost()
+    [ProducesResponseType(
+        typeof(List<TopClientByCostResponse>),
+        StatusCodes.Status200OK)]
+    public ActionResult<List<TopClientByCostResponse>>
+        GetTop5ClientsByTotalCost()
     {
-        var clients = _analyticsService.GetTop5ClientsByTotalCost();
+        logger.LogInformation("Получен запрос топ-5 клиентов по стоимости проживания");
 
-        return Ok(clients);
+        return Ok(analyticsService.GetTop5ClientsByTotalCost());
     }
 }

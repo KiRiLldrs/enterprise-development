@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBase
+public class RoomTypesController(
+    RoomTypeService roomTypeService,
+    ILogger<RoomTypesController> logger) : ControllerBase
 {
     /// <summary>
     /// Возвращает список всех типов номеров
@@ -17,6 +19,8 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
     [ProducesResponseType(typeof(List<RoomTypeResponse>), StatusCodes.Status200OK)]
     public ActionResult<List<RoomTypeResponse>> GetRoomTypes()
     {
+        logger.LogInformation("Получение списка типов номеров");
+
         var roomTypes = roomTypeService.GetAll()
             .Select(ToResponse)
             .ToList();
@@ -25,17 +29,25 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
     }
 
     /// <summary>
-    /// Возвращает тип номера по его идентификатору
+    /// Возвращает тип номера по идентификатору
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(RoomTypeResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<RoomTypeResponse> GetRoomType(int id)
     {
+        logger.LogInformation(
+            "Поиск типа номера с идентификатором {RoomTypeId}",
+            id);
+
         var roomType = roomTypeService.GetById(id);
 
         if (roomType is null)
         {
+            logger.LogWarning(
+                "Тип номера с идентификатором {RoomTypeId} не найден",
+                id);
+
             return NotFound();
         }
 
@@ -50,6 +62,8 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<RoomTypeResponse> CreateRoomType(CreateRoomTypeRequest request)
     {
+        logger.LogInformation("Создание нового типа номера");
+
         var roomType = new RoomType
         {
             Category = request.Category,
@@ -61,6 +75,10 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
 
         var createdRoomType = roomTypeService.Add(roomType);
 
+        logger.LogInformation(
+            "Создан тип номера с идентификатором {RoomTypeId}",
+            createdRoomType.Id);
+
         return CreatedAtAction(
             nameof(GetRoomType),
             new { id = createdRoomType.Id },
@@ -68,7 +86,7 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
     }
 
     /// <summary>
-    /// Обновляет данные существующего типа номера
+    /// Обновляет существующий тип номера
     /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -76,6 +94,10 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult UpdateRoomType(int id, UpdateRoomTypeRequest request)
     {
+        logger.LogInformation(
+            "Обновление типа номера с идентификатором {RoomTypeId}",
+            id);
+
         var roomType = new RoomType
         {
             Category = request.Category,
@@ -89,20 +111,46 @@ public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBa
 
         if (!updated)
         {
+            logger.LogWarning(
+                "Не удалось обновить тип номера с идентификатором {RoomTypeId}: тип номера не найден",
+                id);
+
             return NotFound();
         }
+
+        logger.LogInformation(
+            "Тип номера с идентификатором {RoomTypeId} обновлён",
+            id);
 
         return NoContent();
     }
 
     /// <summary>
-    /// Удаляет тип номера по его идентификатору
+    /// Удаляет тип номера по идентификатору
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteRoomType(int id)
     {
-        roomTypeService.Delete(id);
+        logger.LogInformation(
+            "Удаление типа номера с идентификатором {RoomTypeId}",
+            id);
+
+        var deleted = roomTypeService.Delete(id);
+
+        if (deleted)
+        {
+            logger.LogInformation(
+                "Тип номера с идентификатором {RoomTypeId} удалён",
+                id);
+        }
+        else
+        {
+            logger.LogWarning(
+                "Тип номера с идентификатором {RoomTypeId} не найден при удалении",
+                id);
+        }
+
         return NoContent();
     }
 
