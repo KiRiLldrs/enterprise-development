@@ -1,5 +1,6 @@
+using HotelSystem.Application.Contracts.Clients;
+using HotelSystem.Application.Services;
 using HotelSystem.Domain.Models;
-using HotelSystem.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelSystem.Server.Controllers;
@@ -9,64 +10,86 @@ namespace HotelSystem.Server.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ClientsController : ControllerBase
+public class ClientsController(ClientService clientService) : ControllerBase
 {
-    private readonly ClientService _clientService;
-
-    /// <summary>
-    /// Инициализирует контроллер клиентов
-    /// </summary>
-    public ClientsController(ClientService clientService)
-    {
-        _clientService = clientService;
-    }
-
     /// <summary>
     /// Возвращает список всех клиентов
     /// </summary>
     [HttpGet]
-    public IActionResult GetClients()
+    [ProducesResponseType(typeof(List<ClientResponse>), StatusCodes.Status200OK)]
+    public ActionResult<List<ClientResponse>> GetClients()
     {
-        return Ok(_clientService.GetAll());
+        var clients = clientService.GetAll()
+            .Select(ToResponse)
+            .ToList();
+
+        return Ok(clients);
     }
 
     /// <summary>
-    /// Возвращает клиента по его идентификатору
+    /// Возвращает клиента по идентификатору
     /// </summary>
     [HttpGet("{id:int}")]
-    public IActionResult GetClient(int id)
+    [ProducesResponseType(typeof(ClientResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<ClientResponse> GetClient(int id)
     {
-        var client = _clientService.GetById(id);
+        var client = clientService.GetById(id);
 
         if (client is null)
         {
             return NotFound();
         }
 
-        return Ok(client);
+        return Ok(ToResponse(client));
     }
 
     /// <summary>
     /// Создаёт нового клиента
     /// </summary>
     [HttpPost]
-    public IActionResult CreateClient(Client client)
+    [ProducesResponseType(typeof(ClientResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<ClientResponse> CreateClient(CreateClientRequest request)
     {
-        var createdClient = _clientService.Add(client);
+        var client = new Client
+        {
+            PassportNumber = request.PassportNumber,
+            LastName = request.LastName,
+            FirstName = request.FirstName,
+            Patronymic = request.Patronymic,
+            BirthDate = request.BirthDate,
+            Citizenship = request.Citizenship
+        };
+
+        var createdClient = clientService.Add(client);
 
         return CreatedAtAction(
             nameof(GetClient),
             new { id = createdClient.Id },
-            createdClient);
+            ToResponse(createdClient));
     }
 
     /// <summary>
     /// Обновляет данные существующего клиента
     /// </summary>
     [HttpPut("{id:int}")]
-    public IActionResult UpdateClient(int id, Client client)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult UpdateClient(int id, UpdateClientRequest request)
     {
-        var updated = _clientService.Update(id, client);
+        var client = new Client
+        {
+            PassportNumber = request.PassportNumber,
+            LastName = request.LastName,
+            FirstName = request.FirstName,
+            Patronymic = request.Patronymic,
+            BirthDate = request.BirthDate,
+            Citizenship = request.Citizenship
+        };
+
+        var updated = clientService.Update(id, client);
 
         if (!updated)
         {
@@ -77,18 +100,28 @@ public class ClientsController : ControllerBase
     }
 
     /// <summary>
-    /// Удаляет клиента по его идентификатору
+    /// Удаляет клиента по идентификатору
     /// </summary>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteClient(int id)
     {
-        var deleted = _clientService.Delete(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
+        clientService.Delete(id);
 
         return NoContent();
+    }
+
+    private static ClientResponse ToResponse(Client client)
+    {
+        return new ClientResponse
+        {
+            Id = client.Id,
+            PassportNumber = client.PassportNumber,
+            LastName = client.LastName,
+            FirstName = client.FirstName,
+            Patronymic = client.Patronymic,
+            BirthDate = client.BirthDate,
+            Citizenship = client.Citizenship
+        };
     }
 }

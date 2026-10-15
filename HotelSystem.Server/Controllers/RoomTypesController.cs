@@ -1,72 +1,91 @@
+using HotelSystem.Application.Contracts.RoomTypes;
+using HotelSystem.Application.Services;
 using HotelSystem.Domain.Models;
-using HotelSystem.Server.Services;
 using Microsoft.AspNetCore.Mvc;
-
-namespace HotelSystem.Server.Controllers;
 
 /// <summary>
 /// Контроллер для выполнения CRUD-операций с типами номеров гостиницы
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class RoomTypesController : ControllerBase
+public class RoomTypesController(RoomTypeService roomTypeService) : ControllerBase
 {
-    private readonly RoomTypeService _roomTypeService;
-
-    /// <summary>
-    /// Инициализирует контроллер типов номеров
-    /// </summary>
-    public RoomTypesController(RoomTypeService roomTypeService)
-    {
-        _roomTypeService = roomTypeService;
-    }
-
     /// <summary>
     /// Возвращает список всех типов номеров
     /// </summary>
     [HttpGet]
-    public IActionResult GetRoomTypes()
+    [ProducesResponseType(typeof(List<RoomTypeResponse>), StatusCodes.Status200OK)]
+    public ActionResult<List<RoomTypeResponse>> GetRoomTypes()
     {
-        return Ok(_roomTypeService.GetAll());
+        var roomTypes = roomTypeService.GetAll()
+            .Select(ToResponse)
+            .ToList();
+
+        return Ok(roomTypes);
     }
 
     /// <summary>
     /// Возвращает тип номера по его идентификатору
     /// </summary>
     [HttpGet("{id:int}")]
-    public IActionResult GetRoomType(int id)
+    [ProducesResponseType(typeof(RoomTypeResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<RoomTypeResponse> GetRoomType(int id)
     {
-        var roomType = _roomTypeService.GetById(id);
+        var roomType = roomTypeService.GetById(id);
 
         if (roomType is null)
         {
             return NotFound();
         }
 
-        return Ok(roomType);
+        return Ok(ToResponse(roomType));
     }
 
     /// <summary>
     /// Создаёт новый тип номера
     /// </summary>
     [HttpPost]
-    public IActionResult CreateRoomType(RoomType roomType)
+    [ProducesResponseType(typeof(RoomTypeResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<RoomTypeResponse> CreateRoomType(CreateRoomTypeRequest request)
     {
-        var createdRoomType = _roomTypeService.Add(roomType);
+        var roomType = new RoomType
+        {
+            Category = request.Category,
+            Area = request.Area,
+            BedCount = request.BedCount,
+            HasBathOrShower = request.HasBathOrShower,
+            PricePerDay = request.PricePerDay
+        };
+
+        var createdRoomType = roomTypeService.Add(roomType);
 
         return CreatedAtAction(
             nameof(GetRoomType),
             new { id = createdRoomType.Id },
-            createdRoomType);
+            ToResponse(createdRoomType));
     }
 
     /// <summary>
     /// Обновляет данные существующего типа номера
     /// </summary>
     [HttpPut("{id:int}")]
-    public IActionResult UpdateRoomType(int id, RoomType roomType)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult UpdateRoomType(int id, UpdateRoomTypeRequest request)
     {
-        var updated = _roomTypeService.Update(id, roomType);
+        var roomType = new RoomType
+        {
+            Category = request.Category,
+            Area = request.Area,
+            BedCount = request.BedCount,
+            HasBathOrShower = request.HasBathOrShower,
+            PricePerDay = request.PricePerDay
+        };
+
+        var updated = roomTypeService.Update(id, roomType);
 
         if (!updated)
         {
@@ -80,15 +99,20 @@ public class RoomTypesController : ControllerBase
     /// Удаляет тип номера по его идентификатору
     /// </summary>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteRoomType(int id)
     {
-        var deleted = _roomTypeService.Delete(id);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
-
+        roomTypeService.Delete(id);
         return NoContent();
     }
+
+    private static RoomTypeResponse ToResponse(RoomType roomType) => new()
+    {
+        Id = roomType.Id,
+        Category = roomType.Category,
+        Area = roomType.Area,
+        BedCount = roomType.BedCount,
+        HasBathOrShower = roomType.HasBathOrShower,
+        PricePerDay = roomType.PricePerDay
+    };
 }

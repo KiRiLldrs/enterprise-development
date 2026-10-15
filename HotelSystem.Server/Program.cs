@@ -1,8 +1,17 @@
-using HotelSystem.Server.Services;
+using HotelSystem.Application.Repositories;
+using HotelSystem.Application.Services;
+using HotelSystem.Infrastructure.Repositories;
+using HotelSystem.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddSingleton<HotelInMemoryStorage>();
+builder.Services.AddSingleton<IClientRepository, InMemoryClientRepository>();
+builder.Services.AddSingleton<IRoomTypeRepository, InMemoryRoomTypeRepository>();
+builder.Services.AddSingleton<IRoomRepository, InMemoryRoomRepository>();
+builder.Services.AddSingleton<IBookingRepository, InMemoryBookingRepository>();
 
 builder.Services.AddSingleton<ClientService>();
 builder.Services.AddSingleton<RoomTypeService>();
