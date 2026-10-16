@@ -4,7 +4,7 @@ using HotelSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
-/// Контроллер для выполнения CRUD-операций с бронированиями гостиницы
+/// Контроллер для управления бронированиями гостиницы
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -12,149 +12,54 @@ public class BookingsController(
     BookingService bookingService,
     ClientService clientService,
     RoomService roomService,
-    ILogger<BookingsController> logger) : ControllerBase
+    ILogger<BookingsController> logger)
+    : BaseCrudController<
+        Booking,
+        BookingResponse,
+        CreateBookingRequest,
+        UpdateBookingRequest>(
+        bookingService,
+        logger)
 {
-    /// <summary>
-    /// Возвращает список всех бронирований
-    /// </summary>
-    [HttpGet]
-    [ProducesResponseType(typeof(List<BookingResponse>), StatusCodes.Status200OK)]
-    public ActionResult<List<BookingResponse>> GetBookings()
+    /// <inheritdoc />
+    protected override BookingResponse ToResponse(Booking booking)
     {
-        logger.LogInformation("Получение списка бронирований");
-
-        var bookings = bookingService.GetAll()
-            .Select(ToResponse)
-            .ToList();
-
-        return Ok(bookings);
+        return new BookingResponse
+        {
+            Id = booking.Id,
+            ClientId = booking.Client.Id,
+            RoomId = booking.Room.Id,
+            CheckInDate = booking.CheckInDate,
+            NumberOfDays = booking.NumberOfDays,
+            TotalCost = booking.TotalCost
+        };
     }
 
-    /// <summary>
-    /// Возвращает бронирование по идентификатору
-    /// </summary>
-    [HttpGet("{id:int}")]
-    [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<BookingResponse> GetBooking(int id)
+    /// <inheritdoc />
+    protected override Booking MapCreateRequest(
+        CreateBookingRequest request)
     {
-        logger.LogInformation(
-            "Поиск бронирования с идентификатором {BookingId}",
-            id);
+        var client = clientService.GetById(request.ClientId)!;
+        var room = roomService.GetById(request.RoomId)!;
 
-        var booking = bookingService.GetById(id);
-
-        if (booking is null)
-        {
-            logger.LogWarning(
-                "Бронирование с идентификатором {BookingId} не найдено",
-                id);
-
-            return NotFound();
-        }
-
-        return Ok(ToResponse(booking));
-    }
-
-    /// <summary>
-    /// Создаёт новое бронирование
-    /// </summary>
-    [HttpPost]
-    [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<BookingResponse> CreateBooking(CreateBookingRequest request)
-    {
-        logger.LogInformation("Создание нового бронирования");
-
-        var client = clientService.GetById(request.ClientId);
-
-        if (client is null)
-        {
-            logger.LogWarning(
-                "Не удалось создать бронирование: клиент с идентификатором {ClientId} не найден",
-                request.ClientId);
-
-            return BadRequest("Клиент с указанным идентификатором не найден");
-        }
-
-        var room = roomService.GetById(request.RoomId);
-
-        if (room is null)
-        {
-            logger.LogWarning(
-                "Не удалось создать бронирование: номер с идентификатором {RoomId} не найден",
-                request.RoomId);
-
-            return BadRequest("Номер с указанным идентификатором не найден");
-        }
-
-        var booking = new Booking
+        return new Booking
         {
             Client = client,
             Room = room,
             CheckInDate = request.CheckInDate,
             NumberOfDays = request.NumberOfDays
         };
-
-        var createdBooking = bookingService.Add(booking);
-
-        logger.LogInformation(
-            "Создано бронирование с идентификатором {BookingId}",
-            createdBooking.Id);
-
-        return CreatedAtAction(
-            nameof(GetBooking),
-            new { id = createdBooking.Id },
-            ToResponse(createdBooking));
     }
 
-    /// <summary>
-    /// Обновляет существующее бронирование
-    /// </summary>
-    [HttpPut("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult UpdateBooking(int id, UpdateBookingRequest request)
+    /// <inheritdoc />
+    protected override Booking MapUpdateRequest(
+        int id,
+        UpdateBookingRequest request)
     {
-        logger.LogInformation(
-            "Обновление бронирования с идентификатором {BookingId}",
-            id);
+        var client = clientService.GetById(request.ClientId)!;
+        var room = roomService.GetById(request.RoomId)!;
 
-        var existingBooking = bookingService.GetById(id);
-
-        if (existingBooking is null)
-        {
-            logger.LogWarning(
-                "Не удалось обновить бронирование с идентификатором {BookingId}: бронирование не найдено",
-                id);
-
-            return NotFound();
-        }
-
-        var client = clientService.GetById(request.ClientId);
-
-        if (client is null)
-        {
-            logger.LogWarning(
-                "Не удалось обновить бронирование: клиент с идентификатором {ClientId} не найден",
-                request.ClientId);
-
-            return BadRequest("Клиент с указанным идентификатором не найден");
-        }
-
-        var room = roomService.GetById(request.RoomId);
-
-        if (room is null)
-        {
-            logger.LogWarning(
-                "Не удалось обновить бронирование: номер с идентификатором {RoomId} не найден",
-                request.RoomId);
-
-            return BadRequest("Номер с указанным идентификатором не найден");
-        }
-
-        var booking = new Booking
+        return new Booking
         {
             Id = id,
             Client = client,
@@ -162,61 +67,63 @@ public class BookingsController(
             CheckInDate = request.CheckInDate,
             NumberOfDays = request.NumberOfDays
         };
-
-        var updated = bookingService.Update(id, booking);
-
-        if (!updated)
-        {
-            logger.LogWarning(
-                "Не удалось обновить бронирование с идентификатором {BookingId}",
-                id);
-
-            return NotFound();
-        }
-
-        logger.LogInformation(
-            "Бронирование с идентификатором {BookingId} обновлено",
-            id);
-
-        return NoContent();
     }
 
-    /// <summary>
-    /// Удаляет бронирование по идентификатору
-    /// </summary>
-    [HttpDelete("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public IActionResult DeleteBooking(int id)
+    /// <inheritdoc />
+    protected override int GetEntityId(Booking booking) => booking.Id;
+
+    /// <inheritdoc />
+    protected override IActionResult? ValidateCreateRequest(
+        CreateBookingRequest request)
     {
-        logger.LogInformation(
-            "Удаление бронирования с идентификатором {BookingId}",
-            id);
-
-        var deleted = bookingService.Delete(id);
-
-        if (deleted)
-        {
-            logger.LogInformation(
-                "Бронирование с идентификатором {BookingId} удалено",
-                id);
-        }
-        else
+        if (clientService.GetById(request.ClientId) is null)
         {
             logger.LogWarning(
-                "Бронирование с идентификатором {BookingId} не найдено при удалении",
-                id);
+                "Не удалось создать бронирование: клиент с ID {ClientId} не найден",
+                request.ClientId);
+
+            return BadRequest(
+                "Клиент с указанным идентификатором не найден");
         }
 
-        return NoContent();
+        if (roomService.GetById(request.RoomId) is null)
+        {
+            logger.LogWarning(
+                "Не удалось создать бронирование: номер с ID {RoomId} не найден",
+                request.RoomId);
+
+            return BadRequest(
+                "Номер с указанным идентификатором не найден");
+        }
+
+        return null;
     }
 
-    private static BookingResponse ToResponse(Booking booking) => new()
+    /// <inheritdoc />
+    protected override IActionResult? ValidateUpdateRequest(
+        int id,
+        UpdateBookingRequest request)
     {
-        Id = booking.Id,
-        ClientId = booking.Client.Id,
-        RoomId = booking.Room.Id,
-        CheckInDate = booking.CheckInDate,
-        NumberOfDays = booking.NumberOfDays,
-        TotalCost = booking.TotalCost
-    };
+        if (clientService.GetById(request.ClientId) is null)
+        {
+            logger.LogWarning(
+                "Не удалось обновить бронирование: клиент с ID {ClientId} не найден",
+                request.ClientId);
+
+            return BadRequest(
+                "Клиент с указанным идентификатором не найден");
+        }
+
+        if (roomService.GetById(request.RoomId) is null)
+        {
+            logger.LogWarning(
+                "Не удалось обновить бронирование: номер с ID {RoomId} не найден",
+                request.RoomId);
+
+            return BadRequest(
+                "Номер с указанным идентификатором не найден");
+        }
+
+        return null;
+    }
 }

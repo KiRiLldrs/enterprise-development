@@ -7,6 +7,7 @@ namespace HotelSystem.Application.Services;
 /// Сервис для выполнения CRUD-операций с комнатами
 /// </summary>
 public class RoomService(IRoomRepository roomRepository)
+    : ICrudService<Room>
 {
     /// <summary>
     /// Возвращает все комнаты

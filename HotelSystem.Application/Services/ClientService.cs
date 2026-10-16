@@ -7,6 +7,7 @@ namespace HotelSystem.Application.Services;
 /// Сервис для выполнения CRUD-операций с клиентами гостиницы
 /// </summary>
 public class ClientService(IClientRepository clientRepository)
+    : ICrudService<Client>
 {
     /// <summary>
     /// Возвращает список всех клиентов

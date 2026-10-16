@@ -7,6 +7,7 @@ namespace HotelSystem.Application.Services;
 /// Сервис для выполнения CRUD-операций с типами номеров
 /// </summary>
 public class RoomTypeService(IRoomTypeRepository roomTypeRepository)
+    : ICrudService<RoomType>
 {
     /// <summary>
     /// Возвращает все типы номеров

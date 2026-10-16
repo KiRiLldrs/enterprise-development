@@ -7,6 +7,7 @@ namespace HotelSystem.Application.Services;
 /// Сервис для выполнения CRUD-операций с бронированиями
 /// </summary>
 public class BookingService(IBookingRepository bookingRepository)
+    : ICrudService<Booking>
 {
     /// <summary>
     /// Возвращает все бронирования
