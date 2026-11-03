@@ -3,7 +3,7 @@ namespace HotelSystem.Application.Contracts.Clients;
 /// <summary>
 /// Контракт ответа с информацией о клиенте
 /// </summary>
-public class ClientResponse
+public class ClientResponse : IEntityResponse
 {
     /// <summary>
     /// Идентификатор клиента

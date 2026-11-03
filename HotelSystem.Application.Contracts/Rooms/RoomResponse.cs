@@ -3,7 +3,7 @@ namespace HotelSystem.Application.Contracts.Rooms;
 /// <summary>
 /// Данные номера гостиницы, возвращаемые API
 /// </summary>
-public class RoomResponse
+public class RoomResponse : IEntityResponse
 {
     /// <summary>
     /// Идентификатор номера

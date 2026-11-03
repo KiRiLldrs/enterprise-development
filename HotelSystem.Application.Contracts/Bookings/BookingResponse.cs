@@ -3,7 +3,7 @@ namespace HotelSystem.Application.Contracts.Bookings;
 /// <summary>
 /// Данные бронирования, возвращаемые API
 /// </summary>
-public class BookingResponse
+public class BookingResponse : IEntityResponse
 {
     /// <summary>
     /// Идентификатор бронирования

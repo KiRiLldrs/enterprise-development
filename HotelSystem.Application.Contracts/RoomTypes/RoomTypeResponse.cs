@@ -5,7 +5,7 @@ namespace HotelSystem.Application.Contracts.RoomTypes;
 /// <summary>
 /// Данные типа номера, возвращаемые через API
 /// </summary>
-public class RoomTypeResponse
+public class RoomTypeResponse : IEntityResponse
 {
     /// <summary>
     /// Идентификатор типа номера
