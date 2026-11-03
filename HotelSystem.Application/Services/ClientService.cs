@@ -1,51 +1,33 @@
-using HotelSystem.Application.Repositories;
+using HotelSystem.Application.Contracts.Clients;
+using HotelSystem.Application.Mapping;
 using HotelSystem.Domain.Models;
+using HotelSystem.Domain.Repositories;
 
 namespace HotelSystem.Application.Services;
 
 /// <summary>
 /// Сервис для выполнения CRUD-операций с клиентами гостиницы
 /// </summary>
-public class ClientService(IClientRepository clientRepository)
-    : ICrudService<Client>
+public class ClientService(IRepository<Client> clientRepository)
+    : ICrudService<ClientRequest, ClientResponse>
 {
-    /// <summary>
-    /// Возвращает список всех клиентов
-    /// </summary>
-    public List<Client> GetAll()
-    {
-        return clientRepository.GetAll();
-    }
+    /// <inheritdoc />
+    public List<ClientResponse> GetAll() =>
+        clientRepository.GetAll().Select(client => client.ToResponse()).ToList();
 
-    /// <summary>
-    /// Возвращает клиента по идентификатору
-    /// </summary>
-    public Client? GetById(int id)
-    {
-        return clientRepository.GetById(id);
-    }
+    /// <inheritdoc />
+    public ClientResponse? GetById(int id) =>
+        clientRepository.GetById(id)?.ToResponse();
 
-    /// <summary>
-    /// Добавляет нового клиента
-    /// </summary>
-    public Client Add(Client client)
-    {
-        return clientRepository.Add(client);
-    }
+    /// <inheritdoc />
+    public ClientResponse Add(ClientRequest request) =>
+        clientRepository.Add(request.ToEntity()).ToResponse();
 
-    /// <summary>
-    /// Обновляет данные существующего клиента
-    /// </summary>
-    public bool Update(int id, Client client)
-    {
-        return clientRepository.Update(id, client);
-    }
+    /// <inheritdoc />
+    public bool Update(int id, ClientRequest request) =>
+        clientRepository.Update(id, request.ToEntity());
 
-    /// <summary>
-    /// Удаляет клиента по идентификатору
-    /// </summary>
-    public bool Delete(int id)
-    {
-        return clientRepository.Delete(id);
-    }
+    /// <inheritdoc />
+    public bool Delete(int id) =>
+        clientRepository.Delete(id);
 }

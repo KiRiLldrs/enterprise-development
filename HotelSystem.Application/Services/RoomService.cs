@@ -1,41 +1,51 @@
-using HotelSystem.Application.Repositories;
+using HotelSystem.Application.Contracts.Rooms;
+using HotelSystem.Application.Exceptions;
+using HotelSystem.Application.Mapping;
 using HotelSystem.Domain.Models;
+using HotelSystem.Domain.Repositories;
 
 namespace HotelSystem.Application.Services;
 
 /// <summary>
-/// Сервис для выполнения CRUD-операций с комнатами
+/// Сервис для выполнения CRUD-операций с номерами гостиницы
 /// </summary>
-public class RoomService(IRoomRepository roomRepository)
-    : ICrudService<Room>
+public class RoomService(
+    IRepository<Room> roomRepository,
+    IRepository<RoomType> roomTypeRepository)
+    : ICrudService<RoomRequest, RoomResponse>
 {
-    /// <summary>
-    /// Возвращает все комнаты
-    /// </summary>
-    public List<Room> GetAll() =>
-        roomRepository.GetAll();
+    /// <inheritdoc />
+    public List<RoomResponse> GetAll() =>
+        roomRepository.GetAll().Select(room => room.ToResponse()).ToList();
 
-    /// <summary>
-    /// Возвращает комнату по идентификатору
-    /// </summary>
-    public Room? GetById(int id) =>
-        roomRepository.GetById(id);
+    /// <inheritdoc />
+    public RoomResponse? GetById(int id) =>
+        roomRepository.GetById(id)?.ToResponse();
 
-    /// <summary>
-    /// Добавляет новую комнату
-    /// </summary>
-    public Room Add(Room room) =>
-        roomRepository.Add(room);
+    /// <inheritdoc />
+    public RoomResponse Add(RoomRequest request) =>
+        roomRepository.Add(CreateEntity(request)).ToResponse();
 
-    /// <summary>
-    /// Обновляет комнату
-    /// </summary>
-    public bool Update(int id, Room room) =>
-        roomRepository.Update(id, room);
+    /// <inheritdoc />
+    public bool Update(int id, RoomRequest request)
+    {
+        if (roomRepository.GetById(id) is null)
+        {
+            return false;
+        }
 
-    /// <summary>
-    /// Удаляет комнату
-    /// </summary>
+        return roomRepository.Update(id, CreateEntity(request));
+    }
+
+    /// <inheritdoc />
     public bool Delete(int id) =>
         roomRepository.Delete(id);
+
+    private Room CreateEntity(RoomRequest request)
+    {
+        var roomType = roomTypeRepository.GetById(request.RoomTypeId)
+            ?? throw new ReferenceNotFoundException("Тип номера", request.RoomTypeId);
+
+        return request.ToEntity(roomType);
+    }
 }

@@ -1,41 +1,33 @@
-using HotelSystem.Application.Repositories;
+using HotelSystem.Application.Contracts.RoomTypes;
+using HotelSystem.Application.Mapping;
 using HotelSystem.Domain.Models;
+using HotelSystem.Domain.Repositories;
 
 namespace HotelSystem.Application.Services;
 
 /// <summary>
 /// Сервис для выполнения CRUD-операций с типами номеров
 /// </summary>
-public class RoomTypeService(IRoomTypeRepository roomTypeRepository)
-    : ICrudService<RoomType>
+public class RoomTypeService(IRepository<RoomType> roomTypeRepository)
+    : ICrudService<RoomTypeRequest, RoomTypeResponse>
 {
-    /// <summary>
-    /// Возвращает все типы номеров
-    /// </summary>
-    public List<RoomType> GetAll() =>
-        roomTypeRepository.GetAll();
+    /// <inheritdoc />
+    public List<RoomTypeResponse> GetAll() =>
+        roomTypeRepository.GetAll().Select(roomType => roomType.ToResponse()).ToList();
 
-    /// <summary>
-    /// Возвращает тип номера по идентификатору
-    /// </summary>
-    public RoomType? GetById(int id) =>
-        roomTypeRepository.GetById(id);
+    /// <inheritdoc />
+    public RoomTypeResponse? GetById(int id) =>
+        roomTypeRepository.GetById(id)?.ToResponse();
 
-    /// <summary>
-    /// Добавляет новый тип номера
-    /// </summary>
-    public RoomType Add(RoomType roomType) =>
-        roomTypeRepository.Add(roomType);
+    /// <inheritdoc />
+    public RoomTypeResponse Add(RoomTypeRequest request) =>
+        roomTypeRepository.Add(request.ToEntity()).ToResponse();
 
-    /// <summary>
-    /// Обновляет тип номера
-    /// </summary>
-    public bool Update(int id, RoomType roomType) =>
-        roomTypeRepository.Update(id, roomType);
+    /// <inheritdoc />
+    public bool Update(int id, RoomTypeRequest request) =>
+        roomTypeRepository.Update(id, request.ToEntity());
 
-    /// <summary>
-    /// Удаляет тип номера
-    /// </summary>
+    /// <inheritdoc />
     public bool Delete(int id) =>
         roomTypeRepository.Delete(id);
 }

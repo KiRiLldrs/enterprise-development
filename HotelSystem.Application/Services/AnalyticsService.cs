@@ -1,6 +1,9 @@
 using HotelSystem.Application.Contracts.Analytics;
-using HotelSystem.Application.Repositories;
+using HotelSystem.Application.Contracts.Clients;
+using HotelSystem.Application.Contracts.Rooms;
+using HotelSystem.Application.Mapping;
 using HotelSystem.Domain.Models;
+using HotelSystem.Domain.Repositories;
 using HotelSystem.Domain.Shared.Enums;
 
 namespace HotelSystem.Application.Services;
@@ -8,12 +11,12 @@ namespace HotelSystem.Application.Services;
 /// <summary>
 /// Сервис для выполнения аналитических запросов по данным гостиницы
 /// </summary>
-public class AnalyticsService(IBookingRepository bookingRepository)
+public class AnalyticsService(IRepository<Booking> bookingRepository)
 {
     /// <summary>
     /// 1. Выводит клиентов, проживавших в номерах указанного типа, упорядоченных по ФИО
     /// </summary>
-    public List<Client> GetClientsByRoomCategory(RoomCategory roomCategory)
+    public List<ClientResponse> GetClientsByRoomCategory(RoomCategory roomCategory)
     {
         return bookingRepository.GetAll()
             .Where(booking => booking.Room.RoomType.Category == roomCategory)
@@ -22,13 +25,14 @@ public class AnalyticsService(IBookingRepository bookingRepository)
             .OrderBy(client => client.LastName)
             .ThenBy(client => client.FirstName)
             .ThenBy(client => client.Patronymic)
+            .Select(client => client.ToResponse())
             .ToList();
     }
 
     /// <summary>
     /// 2. Выводит номера, занятые на дату проверки
     /// </summary>
-    public List<Room> GetCurrentlyBookedRooms()
+    public List<RoomResponse> GetCurrentlyBookedRooms()
     {
         var currentDate = new DateTime(2026, 9, 10);
 
@@ -39,6 +43,7 @@ public class AnalyticsService(IBookingRepository bookingRepository)
             .Select(booking => booking.Room)
             .DistinctBy(room => room.Id)
             .OrderBy(room => room.RoomNumber)
+            .Select(room => room.ToResponse())
             .ToList();
     }
 

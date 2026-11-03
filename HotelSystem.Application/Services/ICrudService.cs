@@ -1,30 +1,38 @@
+using HotelSystem.Application.Contracts;
+
 namespace HotelSystem.Application.Services;
 
 /// <summary>
 /// Определяет общие CRUD-операции для сервисов приложения
 /// </summary>
-public interface ICrudService<TEntity>
-    where TEntity : class
+public interface ICrudService<TRequest, TResponse>
+    where TResponse : IEntityResponse
 {
     /// <summary>
     /// Возвращает все сущности
     /// </summary>
-    public List<TEntity> GetAll();
+    public List<TResponse> GetAll();
 
     /// <summary>
     /// Возвращает сущность по идентификатору
     /// </summary>
-    public TEntity? GetById(int id);
+    public TResponse? GetById(int id);
 
     /// <summary>
-    /// Добавляет сущность
+    /// Создаёт сущность
     /// </summary>
-    public TEntity Add(TEntity entity);
+    /// <exception cref="Exceptions.ReferenceNotFoundException">
+    /// Связанная сущность из запроса не найдена
+    /// </exception>
+    public TResponse Add(TRequest request);
 
     /// <summary>
     /// Обновляет сущность
     /// </summary>
-    public bool Update(int id, TEntity entity);
+    /// <exception cref="Exceptions.ReferenceNotFoundException">
+    /// Связанная сущность из запроса не найдена
+    /// </exception>
+    public bool Update(int id, TRequest request);
 
     /// <summary>
     /// Удаляет сущность
