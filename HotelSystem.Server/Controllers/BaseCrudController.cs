@@ -1,13 +1,16 @@
+using HotelSystem.Application.Contracts;
 using HotelSystem.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+
+namespace HotelSystem.Server.Controllers;
 
 /// <summary>
 /// Базовый контроллер с общей реализацией CRUD-операций
 /// </summary>
-public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUpdateRequest>(
-    ICrudService<TEntity> service,
+public abstract class BaseCrudController<TRequest, TResponse>(
+    ICrudService<TRequest, TResponse> service,
     ILogger logger) : ControllerBase
-    where TEntity : class
+    where TResponse : IEntityResponse
 {
     /// <summary>
     /// Возвращает список всех сущностей
@@ -20,10 +23,10 @@ public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUp
 
         logger.LogInformation(
             "Получен список сущностей типа {EntityType}. Количество: {Count}",
-            typeof(TEntity).Name,
+            typeof(TResponse).Name,
             entities.Count);
 
-        return Ok(entities.Select(ToResponse).ToList());
+        return Ok(entities);
     }
 
     /// <summary>
@@ -31,7 +34,7 @@ public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUp
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<TResponse> GetById(int id)
     {
         var entity = service.GetById(id);
@@ -39,19 +42,19 @@ public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUp
         if (entity is null)
         {
             logger.LogWarning(
-                "Сущность типа {EntityType} с ID {Id} не найдена.",
-                typeof(TEntity).Name,
+                "Сущность типа {EntityType} с ID {Id} не найдена",
+                typeof(TResponse).Name,
                 id);
 
             return NotFound();
         }
 
         logger.LogInformation(
-            "Получена сущность типа {EntityType} с ID {Id}.",
-            typeof(TEntity).Name,
+            "Получена сущность типа {EntityType} с ID {Id}",
+            typeof(TResponse).Name,
             id);
 
-        return Ok(ToResponse(entity));
+        return Ok(entity);
     }
 
     /// <summary>
@@ -59,29 +62,17 @@ public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUp
     /// </summary>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public IActionResult Create([FromBody] TCreateRequest request)
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public ActionResult<TResponse> Create([FromBody] TRequest request)
     {
-        var validationResult = ValidateCreateRequest(request);
-
-        if (validationResult is not null)
-        {
-            return validationResult;
-        }
-
-        var entity = MapCreateRequest(request);
-        var createdEntity = service.Add(entity);
-        var id = GetEntityId(createdEntity);
+        var created = service.Add(request);
 
         logger.LogInformation(
-            "Создана сущность типа {EntityType} с ID {Id}.",
-            typeof(TEntity).Name,
-            id);
+            "Создана сущность типа {EntityType} с ID {Id}",
+            typeof(TResponse).Name,
+            created.Id);
 
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id },
-            ToResponse(createdEntity));
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     /// <summary>
@@ -89,44 +80,23 @@ public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUp
     /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult Update(int id, [FromBody] TUpdateRequest request)
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public ActionResult Update(int id, [FromBody] TRequest request)
     {
-        var existingEntity = service.GetById(id);
-
-        if (existingEntity is null)
+        if (!service.Update(id, request))
         {
             logger.LogWarning(
-                "Не удалось обновить сущность типа {EntityType}: ID {Id} не найден.",
-                typeof(TEntity).Name,
-                id);
-
-            return NotFound();
-        }
-
-        var validationResult = ValidateUpdateRequest(id, request);
-
-        if (validationResult is not null)
-        {
-            return validationResult;
-        }
-
-        var updatedEntity = MapUpdateRequest(id, request);
-
-        if (!service.Update(id, updatedEntity))
-        {
-            logger.LogWarning(
-                "Не удалось обновить сущность типа {EntityType} с ID {Id}.",
-                typeof(TEntity).Name,
+                "Не удалось обновить сущность типа {EntityType}: ID {Id} не найден",
+                typeof(TResponse).Name,
                 id);
 
             return NotFound();
         }
 
         logger.LogInformation(
-            "Обновлена сущность типа {EntityType} с ID {Id}.",
-            typeof(TEntity).Name,
+            "Обновлена сущность типа {EntityType} с ID {Id}",
+            typeof(TResponse).Name,
             id);
 
         return NoContent();
@@ -137,59 +107,23 @@ public abstract class BaseCrudController<TEntity, TResponse, TCreateRequest, TUp
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public IActionResult Delete(int id)
+    public ActionResult Delete(int id)
     {
-        var deleted = service.Delete(id);
-
-        if (deleted)
+        if (service.Delete(id))
         {
             logger.LogInformation(
-                "Удалена сущность типа {EntityType} с ID {Id}.",
-                typeof(TEntity).Name,
+                "Удалена сущность типа {EntityType} с ID {Id}",
+                typeof(TResponse).Name,
                 id);
         }
         else
         {
             logger.LogWarning(
-                "Не удалось удалить сущность типа {EntityType} с ID {Id}: сущность не найдена.",
-                typeof(TEntity).Name,
+                "Не удалось удалить сущность типа {EntityType} с ID {Id}: сущность не найдена",
+                typeof(TResponse).Name,
                 id);
         }
 
         return NoContent();
     }
-
-    /// <summary>
-    /// Преобразует сущность в DTO ответ
-    /// </summary>
-    protected abstract TResponse ToResponse(TEntity entity);
-
-    /// <summary>
-    /// Преобразует DTO создания в сущность
-    /// </summary>
-    protected abstract TEntity MapCreateRequest(TCreateRequest request);
-
-    /// <summary>
-    /// Преобразует DTO обновления в сущность
-    /// </summary>
-    protected abstract TEntity MapUpdateRequest(int id, TUpdateRequest request);
-
-    /// <summary>
-    /// Возвращает идентификатор сущности
-    /// </summary>
-    protected abstract int GetEntityId(TEntity entity);
-
-    /// <summary>
-    /// Проверяет данные перед созданием сущности
-    /// </summary>
-    protected virtual IActionResult? ValidateCreateRequest(TCreateRequest request)
-        => null;
-
-    /// <summary>
-    /// Проверяет данные перед обновлением сущности
-    /// </summary>
-    protected virtual IActionResult? ValidateUpdateRequest(
-        int id,
-        TUpdateRequest request)
-        => null;
 }

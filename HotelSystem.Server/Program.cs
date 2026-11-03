@@ -3,12 +3,14 @@ using HotelSystem.Domain.Models;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Repositories;
 using HotelSystem.Infrastructure.Storage;
+using HotelSystem.Server.ExceptionHandlers;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ReferenceNotFoundExceptionHandler>();
 builder.Services.AddOpenApi();
 
 builder.Services.AddSingleton<HotelInMemoryStorage>();

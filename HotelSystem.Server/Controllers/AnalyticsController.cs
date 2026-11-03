@@ -42,20 +42,7 @@ public class AnalyticsController(
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        var clients = analyticsService.GetClientsByRoomCategory(category)
-            .Select(client => new ClientResponse
-            {
-                Id = client.Id,
-                PassportNumber = client.PassportNumber,
-                LastName = client.LastName,
-                FirstName = client.FirstName,
-                Patronymic = client.Patronymic,
-                BirthDate = client.BirthDate,
-                Citizenship = client.Citizenship
-            })
-            .ToList();
-
-        return Ok(clients);
+        return Ok(analyticsService.GetClientsByRoomCategory(category));
     }
 
     /// <summary>
@@ -67,19 +54,7 @@ public class AnalyticsController(
     {
         logger.LogInformation("Получен запрос занятых номеров");
 
-        var rooms = analyticsService.GetCurrentlyBookedRooms()
-            .Select(room => new RoomResponse
-            {
-                Id = room.Id,
-                RoomNumber = room.RoomNumber,
-                Floor = room.Floor,
-                HasBalcony = room.HasBalcony,
-                RoomTypeId = room.RoomType.Id,
-                RoomCategory = room.RoomType.Category.ToString()
-            })
-            .ToList();
-
-        return Ok(rooms);
+        return Ok(analyticsService.GetCurrentlyBookedRooms());
     }
 
     /// <summary>

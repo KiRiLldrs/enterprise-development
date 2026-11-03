@@ -1,105 +1,46 @@
+using HotelSystem.Application.Contracts.Bookings;
 using HotelSystem.Application.Contracts.Rooms;
 using HotelSystem.Application.Services;
-using HotelSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+
+namespace HotelSystem.Server.Controllers;
 
 /// <summary>
 /// Контроллер для управления номерами гостиницы
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
 public class RoomsController(
     RoomService roomService,
-    RoomTypeService roomTypeService,
+    BookingService bookingService,
     ILogger<RoomsController> logger)
-    : BaseCrudController<
-        Room,
-        RoomResponse,
-        CreateRoomRequest,
-        UpdateRoomRequest>(
-        roomService,
-        logger)
+    : BaseCrudController<RoomRequest, RoomResponse>(roomService, logger)
 {
-    /// <inheritdoc />
-    protected override RoomResponse ToResponse(Room room)
+    /// <summary>
+    /// Возвращает бронирования номера
+    /// </summary>
+    [HttpGet("{id:int}/bookings")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public ActionResult<List<BookingResponse>> GetBookings(int id)
     {
-        return new RoomResponse
-        {
-            Id = room.Id,
-            RoomNumber = room.RoomNumber,
-            Floor = room.Floor,
-            HasBalcony = room.HasBalcony,
-            RoomTypeId = room.RoomType.Id,
-            RoomCategory = room.RoomType.Category.ToString()
-        };
-    }
+        var bookings = bookingService.GetByRoomId(id);
 
-    /// <inheritdoc />
-    protected override Room MapCreateRequest(CreateRoomRequest request)
-    {
-        var roomType = roomTypeService.GetById(request.RoomTypeId)!;
-
-        return new Room
-        {
-            RoomNumber = request.RoomNumber,
-            Floor = request.Floor,
-            HasBalcony = request.HasBalcony,
-            RoomType = roomType
-        };
-    }
-
-    /// <inheritdoc />
-    protected override Room MapUpdateRequest(
-        int id,
-        UpdateRoomRequest request)
-    {
-        var roomType = roomTypeService.GetById(request.RoomTypeId)!;
-
-        return new Room
-        {
-            Id = id,
-            RoomNumber = request.RoomNumber,
-            Floor = request.Floor,
-            HasBalcony = request.HasBalcony,
-            RoomType = roomType
-        };
-    }
-
-    /// <inheritdoc />
-    protected override int GetEntityId(Room room) => room.Id;
-
-    /// <inheritdoc />
-    protected override IActionResult? ValidateCreateRequest(
-        CreateRoomRequest request)
-    {
-        if (roomTypeService.GetById(request.RoomTypeId) is null)
+        if (bookings is null)
         {
             logger.LogWarning(
-                "Не удалось создать номер: тип номера с ID {RoomTypeId} не найден",
-                request.RoomTypeId);
+                "Не удалось получить бронирования: номер с ID {Id} не найден",
+                id);
 
-            return BadRequest(
-                "Тип номера с указанным идентификатором не найден");
+            return NotFound();
         }
 
-        return null;
-    }
+        logger.LogInformation(
+            "Получены бронирования номера с ID {Id}. Количество: {Count}",
+            id,
+            bookings.Count);
 
-    /// <inheritdoc />
-    protected override IActionResult? ValidateUpdateRequest(
-        int id,
-        UpdateRoomRequest request)
-    {
-        if (roomTypeService.GetById(request.RoomTypeId) is null)
-        {
-            logger.LogWarning(
-                "Не удалось обновить номер: тип номера с ID {RoomTypeId} не найден",
-                request.RoomTypeId);
-
-            return BadRequest(
-                "Тип номера с указанным идентификатором не найден");
-        }
-
-        return null;
+        return Ok(bookings);
     }
 }

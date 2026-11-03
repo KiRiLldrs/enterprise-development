@@ -1,7 +1,9 @@
+using HotelSystem.Application.Contracts.Bookings;
 using HotelSystem.Application.Contracts.Clients;
 using HotelSystem.Application.Services;
-using HotelSystem.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
+
+namespace HotelSystem.Server.Controllers;
 
 /// <summary>
 /// Контроллер для управления клиентами гостиницы
@@ -10,57 +12,34 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class ClientsController(
     ClientService clientService,
+    BookingService bookingService,
     ILogger<ClientsController> logger)
-    : BaseCrudController<Client, ClientResponse, CreateClientRequest, UpdateClientRequest>(
-        clientService,
-        logger)
+    : BaseCrudController<ClientRequest, ClientResponse>(clientService, logger)
 {
-    /// <inheritdoc />
-    protected override ClientResponse ToResponse(Client client)
+    /// <summary>
+    /// Возвращает бронирования клиента
+    /// </summary>
+    [HttpGet("{id:int}/bookings")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public ActionResult<List<BookingResponse>> GetBookings(int id)
     {
-        return new ClientResponse
-        {
-            Id = client.Id,
-            PassportNumber = client.PassportNumber,
-            LastName = client.LastName,
-            FirstName = client.FirstName,
-            Patronymic = client.Patronymic,
-            BirthDate = client.BirthDate,
-            Citizenship = client.Citizenship
-        };
-    }
+        var bookings = bookingService.GetByClientId(id);
 
-    /// <inheritdoc />
-    protected override Client MapCreateRequest(CreateClientRequest request)
-    {
-        return new Client
+        if (bookings is null)
         {
-            PassportNumber = request.PassportNumber,
-            LastName = request.LastName,
-            FirstName = request.FirstName,
-            Patronymic = request.Patronymic,
-            BirthDate = request.BirthDate,
-            Citizenship = request.Citizenship
-        };
-    }
+            logger.LogWarning(
+                "Не удалось получить бронирования: клиент с ID {Id} не найден",
+                id);
 
-    /// <inheritdoc />
-    protected override Client MapUpdateRequest(
-        int id,
-        UpdateClientRequest request)
-    {
-        return new Client
-        {
-            Id = id,
-            PassportNumber = request.PassportNumber,
-            LastName = request.LastName,
-            FirstName = request.FirstName,
-            Patronymic = request.Patronymic,
-            BirthDate = request.BirthDate,
-            Citizenship = request.Citizenship
-        };
-    }
+            return NotFound();
+        }
 
-    /// <inheritdoc />
-    protected override int GetEntityId(Client client) => client.Id;
+        logger.LogInformation(
+            "Получены бронирования клиента с ID {Id}. Количество: {Count}",
+            id,
+            bookings.Count);
+
+        return Ok(bookings);
+    }
 }
