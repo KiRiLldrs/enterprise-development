@@ -1,5 +1,5 @@
-using HotelSystem.Application.Repositories;
 using HotelSystem.Domain.Models;
+using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Storage;
 
 namespace HotelSystem.Infrastructure.Repositories;
@@ -8,13 +8,16 @@ namespace HotelSystem.Infrastructure.Repositories;
 /// Репозиторий клиентов гостиницы с хранением данных в памяти
 /// </summary>
 public class InMemoryClientRepository(HotelInMemoryStorage storage)
-    : IClientRepository
+    : IRepository<Client>
 {
+    /// <inheritdoc />
     public List<Client> GetAll() => storage.Clients;
 
+    /// <inheritdoc />
     public Client? GetById(int id) =>
         storage.Clients.FirstOrDefault(client => client.Id == id);
 
+    /// <inheritdoc />
     public Client Add(Client client)
     {
         client.Id = storage.Clients.Count == 0
@@ -26,6 +29,7 @@ public class InMemoryClientRepository(HotelInMemoryStorage storage)
         return client;
     }
 
+    /// <inheritdoc />
     public bool Update(int id, Client client)
     {
         var index = storage.Clients.FindIndex(existing => existing.Id == id);
@@ -41,6 +45,7 @@ public class InMemoryClientRepository(HotelInMemoryStorage storage)
         return true;
     }
 
+    /// <inheritdoc />
     public bool Delete(int id)
     {
         var client = GetById(id);
