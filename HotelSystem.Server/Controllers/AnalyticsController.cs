@@ -12,6 +12,7 @@ namespace HotelSystem.Server.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
 public class AnalyticsController(
     AnalyticsService analyticsService,
     ILogger<AnalyticsController> logger) : ControllerBase
@@ -19,14 +20,27 @@ public class AnalyticsController(
     /// <summary>
     /// 1. Выводит клиентов, проживавших в номерах указанного типа, упорядоченных по ФИО
     /// </summary>
+    /// <param name="category">Категория номера</param>
     [HttpGet("clients-by-room-category/{category}")]
-    [ProducesResponseType(typeof(List<ClientResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType<List<ClientResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public ActionResult<List<ClientResponse>> GetClientsByRoomCategory(
         RoomCategory category)
     {
         logger.LogInformation(
             "Получен запрос клиентов по категории номера {Category}",
             category);
+
+        if (!Enum.IsDefined(category))
+        {
+            logger.LogWarning(
+                "Получена неизвестная категория номера {Category}",
+                category);
+
+            return Problem(
+                detail: "Указана несуществующая категория номера",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
 
         var clients = analyticsService.GetClientsByRoomCategory(category)
             .Select(client => new ClientResponse
@@ -48,7 +62,7 @@ public class AnalyticsController(
     /// 2. Выводит номера, занятые на дату проверки
     /// </summary>
     [HttpGet("occupied-rooms")]
-    [ProducesResponseType(typeof(List<RoomResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType<List<RoomResponse>>(StatusCodes.Status200OK)]
     public ActionResult<List<RoomResponse>> GetCurrentlyBookedRooms()
     {
         logger.LogInformation("Получен запрос занятых номеров");
@@ -72,9 +86,7 @@ public class AnalyticsController(
     /// 3. Выводит топ-5 наиболее часто бронируемых номеров
     /// </summary>
     [HttpGet("top-booked-rooms")]
-    [ProducesResponseType(
-        typeof(List<TopBookedRoomResponse>),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType<List<TopBookedRoomResponse>>(StatusCodes.Status200OK)]
     public ActionResult<List<TopBookedRoomResponse>>
         GetTop5MostFrequentlyBookedRooms()
     {
@@ -87,9 +99,7 @@ public class AnalyticsController(
     /// 4. Выводит количество бронирований для каждого номера
     /// </summary>
     [HttpGet("booking-count-by-room")]
-    [ProducesResponseType(
-        typeof(List<RoomBookingCountResponse>),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType<List<RoomBookingCountResponse>>(StatusCodes.Status200OK)]
     public ActionResult<List<RoomBookingCountResponse>>
         GetBookingCountForEachRoom()
     {
@@ -102,9 +112,7 @@ public class AnalyticsController(
     /// 5. Выводит топ-5 клиентов по суммарной стоимости проживания
     /// </summary>
     [HttpGet("top-clients-by-cost")]
-    [ProducesResponseType(
-        typeof(List<TopClientByCostResponse>),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType<List<TopClientByCostResponse>>(StatusCodes.Status200OK)]
     public ActionResult<List<TopClientByCostResponse>>
         GetTop5ClientsByTotalCost()
     {
