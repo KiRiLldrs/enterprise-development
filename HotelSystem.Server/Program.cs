@@ -1,8 +1,9 @@
+using Aspire.Npgsql.EntityFrameworkCore.PostgreSQL;
 using HotelSystem.Application.Services;
 using HotelSystem.Domain.Models;
 using HotelSystem.Domain.Repositories;
-using HotelSystem.Infrastructure.Repositories;
-using HotelSystem.Infrastructure.Storage;
+using HotelSystem.Infrastructure.EfCore.Data;
+using HotelSystem.Infrastructure.EfCore.Repositories;
 using HotelSystem.Server.ExceptionHandlers;
 using Scalar.AspNetCore;
 
@@ -13,18 +14,21 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ReferenceNotFoundExceptionHandler>();
 builder.Services.AddOpenApi();
 
-builder.Services.AddSingleton<HotelInMemoryStorage>();
+// Подключение к PostgreSQL через Aspire
+builder.AddNpgsqlDbContext<HotelDbContext>("hoteldb");
 
-builder.Services.AddSingleton<IRepository<Client>, InMemoryClientRepository>();
-builder.Services.AddSingleton<IRepository<RoomType>, InMemoryRoomTypeRepository>();
-builder.Services.AddSingleton<IRepository<Room>, InMemoryRoomRepository>();
-builder.Services.AddSingleton<IRepository<Booking>, InMemoryBookingRepository>();
+// Регистрация EF Core репозиториев
+builder.Services.AddScoped<IRepository<Client>, EfClientRepository>();
+builder.Services.AddScoped<IRepository<RoomType>, EfRoomTypeRepository>();
+builder.Services.AddScoped<IRepository<Room>, EfRoomRepository>();
+builder.Services.AddScoped<IRepository<Booking>, EfBookingRepository>();
 
-builder.Services.AddSingleton<ClientService>();
-builder.Services.AddSingleton<RoomTypeService>();
-builder.Services.AddSingleton<RoomService>();
-builder.Services.AddSingleton<BookingService>();
-builder.Services.AddSingleton<AnalyticsService>();
+// Регистрация сервисов приложения
+builder.Services.AddScoped<ClientService>();
+builder.Services.AddScoped<RoomTypeService>();
+builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<AnalyticsService>();
 
 var app = builder.Build();
 

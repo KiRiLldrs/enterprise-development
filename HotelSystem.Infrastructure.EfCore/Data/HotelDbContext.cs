@@ -1,10 +1,11 @@
+using HotelSystem.Domain.Data;
 using HotelSystem.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelSystem.Infrastructure.EfCore.Data;
 
 /// <summary>
-/// Определяет наборы сущностей и настройки их связей
+/// Определяет наборы сущностей, их связи и начальные данные
 /// </summary>
 public class HotelDbContext(DbContextOptions<HotelDbContext> options)
     : DbContext(options)
@@ -30,7 +31,7 @@ public class HotelDbContext(DbContextOptions<HotelDbContext> options)
     public DbSet<Booking> Bookings => Set<Booking>();
 
     /// <summary>
-    /// Настраивает таблицы, ключи и связи между сущностями базы данных
+    /// Настраивает сущности, связи между ними и начальное заполнение базы данных
     /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,11 +52,19 @@ public class HotelDbContext(DbContextOptions<HotelDbContext> options)
 
             entity.Property(client => client.Citizenship)
                 .IsRequired();
+
+            entity.Property(client => client.BirthDate)
+                .HasColumnType("timestamp without time zone");
+
+            entity.HasData(HotelTestData.Clients);
+
         });
 
         modelBuilder.Entity<RoomType>(entity =>
         {
             entity.HasKey(roomType => roomType.Id);
+
+            entity.HasData(HotelTestData.RoomTypes);
         });
 
         modelBuilder.Entity<Room>(entity =>
@@ -67,6 +76,16 @@ public class HotelDbContext(DbContextOptions<HotelDbContext> options)
                 .HasForeignKey("RoomTypeId")
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasData(
+                HotelTestData.Rooms.Select(room => new
+                {
+                    room.Id,
+                    room.RoomNumber,
+                    room.Floor,
+                    room.HasBalcony,
+                    RoomTypeId = room.RoomType.Id
+                }));
         });
 
         modelBuilder.Entity<Booking>(entity =>
@@ -86,6 +105,21 @@ public class HotelDbContext(DbContextOptions<HotelDbContext> options)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.Ignore(booking => booking.TotalCost);
+
+            entity.Property(booking => booking.CheckInDate)
+                .HasColumnType("timestamp without time zone");
+
+            entity.HasData(
+                HotelTestData.Bookings.Select(booking => new
+                {
+                    booking.Id,
+                    ClientId = booking.Client.Id,
+                    RoomId = booking.Room.Id,
+                    booking.CheckInDate,
+                    booking.NumberOfDays
+                }));
         });
+
+
     }
 }

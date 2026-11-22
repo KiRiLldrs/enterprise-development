@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.6.5" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Scalar.AspNetCore" Version="2.18.3" />
   </ItemGroup>
 
@@ -17,6 +22,7 @@
     <ProjectReference Include="..\HotelSystem.Application\HotelSystem.Application.csproj" />
     <ProjectReference Include="..\HotelSystem.Infrastructure\HotelSystem.Infrastructure.csproj" />
     <ProjectReference Include="..\HotelSystem.Application.Contracts\HotelSystem.Application.Contracts.csproj" />
+    <ProjectReference Include="..\HotelSystem.Infrastructure.EfCore\HotelSystem.Infrastructure.EfCore.csproj" />
   </ItemGroup>
 
 </Project>
