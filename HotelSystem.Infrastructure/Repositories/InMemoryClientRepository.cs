@@ -11,14 +11,16 @@ public class InMemoryClientRepository(HotelInMemoryStorage storage)
     : IRepository<Client>
 {
     /// <inheritdoc />
-    public List<Client> GetAll() => storage.Clients;
+    public Task<List<Client>> GetAllAsync() =>
+        Task.FromResult(storage.Clients);
 
     /// <inheritdoc />
-    public Client? GetById(int id) =>
-        storage.Clients.FirstOrDefault(client => client.Id == id);
+    public Task<Client?> GetByIdAsync(int id) =>
+        Task.FromResult(
+            storage.Clients.FirstOrDefault(client => client.Id == id));
 
     /// <inheritdoc />
-    public Client Add(Client client)
+    public Task<Client> AddAsync(Client client)
     {
         client.Id = storage.Clients.Count == 0
             ? 1
@@ -26,30 +28,32 @@ public class InMemoryClientRepository(HotelInMemoryStorage storage)
 
         storage.Clients.Add(client);
 
-        return client;
+        return Task.FromResult(client);
     }
 
     /// <inheritdoc />
-    public bool Update(int id, Client client)
+    public Task<bool> UpdateAsync(int id, Client client)
     {
         var index = storage.Clients.FindIndex(existing => existing.Id == id);
 
         if (index == -1)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         client.Id = id;
         storage.Clients[index] = client;
 
-        return true;
+        return Task.FromResult(true);
     }
 
     /// <inheritdoc />
-    public bool Delete(int id)
+    public Task<bool> DeleteAsync(int id)
     {
-        var client = GetById(id);
+        var client = storage.Clients.FirstOrDefault(
+            existing => existing.Id == id);
 
-        return client is not null && storage.Clients.Remove(client);
+        return Task.FromResult(
+            client is not null && storage.Clients.Remove(client));
     }
 }

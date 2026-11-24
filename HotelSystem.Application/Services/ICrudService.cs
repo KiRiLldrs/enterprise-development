@@ -11,31 +11,25 @@ public interface ICrudService<TRequest, TResponse>
     /// <summary>
     /// Возвращает все сущности
     /// </summary>
-    public List<TResponse> GetAll();
+    public Task<List<TResponse>> GetAllAsync();
 
     /// <summary>
     /// Возвращает сущность по идентификатору
     /// </summary>
-    public TResponse? GetById(int id);
+    public Task<TResponse?> GetByIdAsync(int id);
 
     /// <summary>
     /// Создаёт сущность
     /// </summary>
-    /// <exception cref="Exceptions.ReferenceNotFoundException">
-    /// Связанная сущность из запроса не найдена
-    /// </exception>
-    public TResponse Add(TRequest request);
+    public Task<TResponse> AddAsync(TRequest request);
 
     /// <summary>
     /// Обновляет сущность
     /// </summary>
-    /// <exception cref="Exceptions.ReferenceNotFoundException">
-    /// Связанная сущность из запроса не найдена
-    /// </exception>
-    public bool Update(int id, TRequest request);
+    public Task<bool> UpdateAsync(int id, TRequest request);
 
     /// <summary>
     /// Удаляет сущность
     /// </summary>
-    public bool Delete(int id);
+    public Task<bool> DeleteAsync(int id);
 }

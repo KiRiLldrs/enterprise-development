@@ -11,14 +11,16 @@ public class InMemoryRoomTypeRepository(HotelInMemoryStorage storage)
     : IRepository<RoomType>
 {
     /// <inheritdoc />
-    public List<RoomType> GetAll() => storage.RoomTypes;
+    public Task<List<RoomType>> GetAllAsync() =>
+        Task.FromResult(storage.RoomTypes);
 
     /// <inheritdoc />
-    public RoomType? GetById(int id) =>
-        storage.RoomTypes.FirstOrDefault(roomType => roomType.Id == id);
+    public Task<RoomType?> GetByIdAsync(int id) =>
+        Task.FromResult(
+            storage.RoomTypes.FirstOrDefault(roomType => roomType.Id == id));
 
     /// <inheritdoc />
-    public RoomType Add(RoomType roomType)
+    public Task<RoomType> AddAsync(RoomType roomType)
     {
         roomType.Id = storage.RoomTypes.Count == 0
             ? 1
@@ -26,30 +28,32 @@ public class InMemoryRoomTypeRepository(HotelInMemoryStorage storage)
 
         storage.RoomTypes.Add(roomType);
 
-        return roomType;
+        return Task.FromResult(roomType);
     }
 
     /// <inheritdoc />
-    public bool Update(int id, RoomType roomType)
+    public Task<bool> UpdateAsync(int id, RoomType roomType)
     {
         var index = storage.RoomTypes.FindIndex(existing => existing.Id == id);
 
         if (index == -1)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         roomType.Id = id;
         storage.RoomTypes[index] = roomType;
 
-        return true;
+        return Task.FromResult(true);
     }
 
     /// <inheritdoc />
-    public bool Delete(int id)
+    public Task<bool> DeleteAsync(int id)
     {
-        var roomType = GetById(id);
+        var roomType = storage.RoomTypes.FirstOrDefault(
+            existing => existing.Id == id);
 
-        return roomType is not null && storage.RoomTypes.Remove(roomType);
+        return Task.FromResult(
+            roomType is not null && storage.RoomTypes.Remove(roomType));
     }
 }

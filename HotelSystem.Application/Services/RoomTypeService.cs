@@ -12,22 +12,24 @@ public class RoomTypeService(IRepository<RoomType> roomTypeRepository)
     : ICrudService<RoomTypeRequest, RoomTypeResponse>
 {
     /// <inheritdoc />
-    public List<RoomTypeResponse> GetAll() =>
-        roomTypeRepository.GetAll().Select(roomType => roomType.ToResponse()).ToList();
+    public async Task<List<RoomTypeResponse>> GetAllAsync() =>
+        (await roomTypeRepository.GetAllAsync())
+            .Select(roomType => roomType.ToResponse())
+            .ToList();
 
     /// <inheritdoc />
-    public RoomTypeResponse? GetById(int id) =>
-        roomTypeRepository.GetById(id)?.ToResponse();
+    public async Task<RoomTypeResponse?> GetByIdAsync(int id) =>
+        (await roomTypeRepository.GetByIdAsync(id))?.ToResponse();
 
     /// <inheritdoc />
-    public RoomTypeResponse Add(RoomTypeRequest request) =>
-        roomTypeRepository.Add(request.ToEntity()).ToResponse();
+    public async Task<RoomTypeResponse> AddAsync(RoomTypeRequest request) =>
+        (await roomTypeRepository.AddAsync(request.ToEntity())).ToResponse();
 
     /// <inheritdoc />
-    public bool Update(int id, RoomTypeRequest request) =>
-        roomTypeRepository.Update(id, request.ToEntity());
+    public async Task<bool> UpdateAsync(int id, RoomTypeRequest request) =>
+        await roomTypeRepository.UpdateAsync(id, request.ToEntity());
 
     /// <inheritdoc />
-    public bool Delete(int id) =>
-        roomTypeRepository.Delete(id);
+    public async Task<bool> DeleteAsync(int id) =>
+        await roomTypeRepository.DeleteAsync(id);
 }

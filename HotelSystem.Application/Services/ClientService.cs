@@ -12,22 +12,24 @@ public class ClientService(IRepository<Client> clientRepository)
     : ICrudService<ClientRequest, ClientResponse>
 {
     /// <inheritdoc />
-    public List<ClientResponse> GetAll() =>
-        clientRepository.GetAll().Select(client => client.ToResponse()).ToList();
+    public async Task<List<ClientResponse>> GetAllAsync() =>
+        (await clientRepository.GetAllAsync())
+            .Select(client => client.ToResponse())
+            .ToList();
 
     /// <inheritdoc />
-    public ClientResponse? GetById(int id) =>
-        clientRepository.GetById(id)?.ToResponse();
+    public async Task<ClientResponse?> GetByIdAsync(int id) =>
+        (await clientRepository.GetByIdAsync(id))?.ToResponse();
 
     /// <inheritdoc />
-    public ClientResponse Add(ClientRequest request) =>
-        clientRepository.Add(request.ToEntity()).ToResponse();
+    public async Task<ClientResponse> AddAsync(ClientRequest request) =>
+        (await clientRepository.AddAsync(request.ToEntity())).ToResponse();
 
     /// <inheritdoc />
-    public bool Update(int id, ClientRequest request) =>
-        clientRepository.Update(id, request.ToEntity());
+    public async Task<bool> UpdateAsync(int id, ClientRequest request) =>
+        await clientRepository.UpdateAsync(id, request.ToEntity());
 
     /// <inheritdoc />
-    public bool Delete(int id) =>
-        clientRepository.Delete(id);
+    public async Task<bool> DeleteAsync(int id) =>
+        await clientRepository.DeleteAsync(id);
 }

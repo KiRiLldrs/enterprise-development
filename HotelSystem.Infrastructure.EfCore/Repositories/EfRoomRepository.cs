@@ -1,4 +1,3 @@
-
 using HotelSystem.Domain.Models;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.EfCore.Data;
@@ -12,30 +11,30 @@ namespace HotelSystem.Infrastructure.EfCore.Repositories;
 public class EfRoomRepository(HotelDbContext context) : IRepository<Room>
 {
     /// <inheritdoc />
-    public List<Room> GetAll() =>
-        context.Rooms
+    public async Task<List<Room>> GetAllAsync() =>
+        await context.Rooms
             .Include(room => room.RoomType)
-            .ToList();
+            .ToListAsync();
 
     /// <inheritdoc />
-    public Room? GetById(int id) =>
-        context.Rooms
+    public async Task<Room?> GetByIdAsync(int id) =>
+        await context.Rooms
             .Include(room => room.RoomType)
-            .FirstOrDefault(room => room.Id == id);
+            .FirstOrDefaultAsync(room => room.Id == id);
 
     /// <inheritdoc />
-    public Room Add(Room room)
+    public async Task<Room> AddAsync(Room room)
     {
-        context.Rooms.Add(room);
-        context.SaveChanges();
+        await context.Rooms.AddAsync(room);
+        await context.SaveChangesAsync();
 
         return room;
     }
 
     /// <inheritdoc />
-    public bool Update(int id, Room room)
+    public async Task<bool> UpdateAsync(int id, Room room)
     {
-        var existingRoom = GetById(id);
+        var existingRoom = await GetByIdAsync(id);
 
         if (existingRoom is null)
         {
@@ -47,15 +46,15 @@ public class EfRoomRepository(HotelDbContext context) : IRepository<Room>
         existingRoom.HasBalcony = room.HasBalcony;
         existingRoom.RoomType = room.RoomType;
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return true;
     }
 
     /// <inheritdoc />
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var room = GetById(id);
+        var room = await GetByIdAsync(id);
 
         if (room is null)
         {
@@ -63,7 +62,7 @@ public class EfRoomRepository(HotelDbContext context) : IRepository<Room>
         }
 
         context.Rooms.Remove(room);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return true;
     }

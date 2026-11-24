@@ -11,14 +11,16 @@ public class InMemoryBookingRepository(HotelInMemoryStorage storage)
     : IRepository<Booking>
 {
     /// <inheritdoc />
-    public List<Booking> GetAll() => storage.Bookings;
+    public Task<List<Booking>> GetAllAsync() =>
+        Task.FromResult(storage.Bookings);
 
     /// <inheritdoc />
-    public Booking? GetById(int id) =>
-        storage.Bookings.FirstOrDefault(booking => booking.Id == id);
+    public Task<Booking?> GetByIdAsync(int id) =>
+        Task.FromResult(
+            storage.Bookings.FirstOrDefault(booking => booking.Id == id));
 
     /// <inheritdoc />
-    public Booking Add(Booking booking)
+    public Task<Booking> AddAsync(Booking booking)
     {
         booking.Id = storage.Bookings.Count == 0
             ? 1
@@ -26,30 +28,33 @@ public class InMemoryBookingRepository(HotelInMemoryStorage storage)
 
         storage.Bookings.Add(booking);
 
-        return booking;
+        return Task.FromResult(booking);
     }
 
     /// <inheritdoc />
-    public bool Update(int id, Booking booking)
+    public Task<bool> UpdateAsync(int id, Booking booking)
     {
-        var index = storage.Bookings.FindIndex(existing => existing.Id == id);
+        var index = storage.Bookings.FindIndex(
+            existing => existing.Id == id);
 
         if (index == -1)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         booking.Id = id;
         storage.Bookings[index] = booking;
 
-        return true;
+        return Task.FromResult(true);
     }
 
     /// <inheritdoc />
-    public bool Delete(int id)
+    public Task<bool> DeleteAsync(int id)
     {
-        var booking = GetById(id);
+        var booking = storage.Bookings.FirstOrDefault(
+            existing => existing.Id == id);
 
-        return booking is not null && storage.Bookings.Remove(booking);
+        return Task.FromResult(
+            booking is not null && storage.Bookings.Remove(booking));
     }
 }

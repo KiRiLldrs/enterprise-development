@@ -16,9 +16,9 @@ public class AnalyticsService(IRepository<Booking> bookingRepository)
     /// <summary>
     /// 1. Выводит клиентов, проживавших в номерах указанного типа, упорядоченных по ФИО
     /// </summary>
-    public List<ClientResponse> GetClientsByRoomCategory(RoomCategory roomCategory)
+    public async Task<List<ClientResponse>> GetClientsByRoomCategoryAsync(RoomCategory roomCategory)
     {
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .Where(booking => booking.Room.RoomType.Category == roomCategory)
             .Select(booking => booking.Client)
             .DistinctBy(client => client.Id)
@@ -32,11 +32,11 @@ public class AnalyticsService(IRepository<Booking> bookingRepository)
     /// <summary>
     /// 2. Выводит номера, занятые на дату проверки
     /// </summary>
-    public List<RoomResponse> GetCurrentlyBookedRooms()
+    public async Task<List<RoomResponse>> GetCurrentlyBookedRoomsAsync()
     {
         var currentDate = new DateTime(2026, 9, 10);
 
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .Where(booking =>
                 booking.CheckInDate <= currentDate &&
                 booking.CheckInDate.AddDays(booking.NumberOfDays) > currentDate)
@@ -50,9 +50,9 @@ public class AnalyticsService(IRepository<Booking> bookingRepository)
     /// <summary>
     /// 3. Выводит топ-5 наиболее часто бронируемых номеров
     /// </summary>
-    public List<TopBookedRoomResponse> GetTop5MostFrequentlyBookedRooms()
+    public async Task<List<TopBookedRoomResponse>> GetTop5MostFrequentlyBookedRoomsAsync()
     {
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .GroupBy(booking => booking.Room)
             .OrderByDescending(group => group.Count())
             .ThenBy(group => group.Key.RoomNumber)
@@ -68,9 +68,9 @@ public class AnalyticsService(IRepository<Booking> bookingRepository)
     /// <summary>
     /// 4. Выводит количество бронирований для каждого номера
     /// </summary>
-    public List<RoomBookingCountResponse> GetBookingCountForEachRoom()
+    public async Task<List<RoomBookingCountResponse>> GetBookingCountForEachRoomAsync()
     {
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .GroupBy(booking => booking.Room.RoomNumber)
             .OrderBy(group => group.Key)
             .Select(group => new RoomBookingCountResponse
@@ -84,9 +84,9 @@ public class AnalyticsService(IRepository<Booking> bookingRepository)
     /// <summary>
     /// 5. Выводит топ-5 клиентов по суммарной стоимости проживания
     /// </summary>
-    public List<TopClientByCostResponse> GetTop5ClientsByTotalCost()
+    public async Task<List<TopClientByCostResponse>> GetTop5ClientsByTotalCostAsync()
     {
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .GroupBy(booking => booking.Client)
             .Select(group => new
             {

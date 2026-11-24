@@ -15,35 +15,37 @@ public class RoomService(
     : ICrudService<RoomRequest, RoomResponse>
 {
     /// <inheritdoc />
-    public List<RoomResponse> GetAll() =>
-        roomRepository.GetAll().Select(room => room.ToResponse()).ToList();
+    public async Task<List<RoomResponse>> GetAllAsync() =>
+        (await roomRepository.GetAllAsync())
+            .Select(room => room.ToResponse())
+            .ToList();
 
     /// <inheritdoc />
-    public RoomResponse? GetById(int id) =>
-        roomRepository.GetById(id)?.ToResponse();
+    public async Task<RoomResponse?> GetByIdAsync(int id) =>
+        (await roomRepository.GetByIdAsync(id))?.ToResponse();
 
     /// <inheritdoc />
-    public RoomResponse Add(RoomRequest request) =>
-        roomRepository.Add(CreateEntity(request)).ToResponse();
+    public async Task<RoomResponse> AddAsync(RoomRequest request) =>
+        (await roomRepository.AddAsync(await CreateEntityAsync(request))).ToResponse();
 
     /// <inheritdoc />
-    public bool Update(int id, RoomRequest request)
+    public async Task<bool> UpdateAsync(int id, RoomRequest request)
     {
-        if (roomRepository.GetById(id) is null)
+        if (await roomRepository.GetByIdAsync(id) is null)
         {
             return false;
         }
 
-        return roomRepository.Update(id, CreateEntity(request));
+        return await roomRepository.UpdateAsync(id, await CreateEntityAsync(request));
     }
 
     /// <inheritdoc />
-    public bool Delete(int id) =>
-        roomRepository.Delete(id);
+    public async Task<bool> DeleteAsync(int id) =>
+        await roomRepository.DeleteAsync(id);
 
-    private Room CreateEntity(RoomRequest request)
+    private async Task<Room> CreateEntityAsync(RoomRequest request)
     {
-        var roomType = roomTypeRepository.GetById(request.RoomTypeId)
+        var roomType = await roomTypeRepository.GetByIdAsync(request.RoomTypeId)
             ?? throw new ReferenceNotFoundException("Тип номера", request.RoomTypeId);
 
         return request.ToEntity(roomType);

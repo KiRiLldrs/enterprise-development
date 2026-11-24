@@ -1,4 +1,3 @@
-
 using HotelSystem.Domain.Models;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.EfCore.Data;
@@ -12,34 +11,34 @@ namespace HotelSystem.Infrastructure.EfCore.Repositories;
 public class EfBookingRepository(HotelDbContext context) : IRepository<Booking>
 {
     /// <inheritdoc />
-    public List<Booking> GetAll() =>
-        context.Bookings
+    public async Task<List<Booking>> GetAllAsync() =>
+        await context.Bookings
             .Include(booking => booking.Client)
             .Include(booking => booking.Room)
                 .ThenInclude(room => room.RoomType)
-            .ToList();
+            .ToListAsync();
 
     /// <inheritdoc />
-    public Booking? GetById(int id) =>
-        context.Bookings
+    public async Task<Booking?> GetByIdAsync(int id) =>
+        await context.Bookings
             .Include(booking => booking.Client)
             .Include(booking => booking.Room)
                 .ThenInclude(room => room.RoomType)
-            .FirstOrDefault(booking => booking.Id == id);
+            .FirstOrDefaultAsync(booking => booking.Id == id);
 
     /// <inheritdoc />
-    public Booking Add(Booking booking)
+    public async Task<Booking> AddAsync(Booking booking)
     {
-        context.Bookings.Add(booking);
-        context.SaveChanges();
+        await context.Bookings.AddAsync(booking);
+        await context.SaveChangesAsync();
 
         return booking;
     }
 
     /// <inheritdoc />
-    public bool Update(int id, Booking booking)
+    public async Task<bool> UpdateAsync(int id, Booking booking)
     {
-        var existingBooking = GetById(id);
+        var existingBooking = await GetByIdAsync(id);
 
         if (existingBooking is null)
         {
@@ -51,15 +50,15 @@ public class EfBookingRepository(HotelDbContext context) : IRepository<Booking>
         existingBooking.CheckInDate = booking.CheckInDate;
         existingBooking.NumberOfDays = booking.NumberOfDays;
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return true;
     }
 
     /// <inheritdoc />
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var booking = GetById(id);
+        var booking = await GetByIdAsync(id);
 
         if (booking is null)
         {
@@ -67,7 +66,7 @@ public class EfBookingRepository(HotelDbContext context) : IRepository<Booking>
         }
 
         context.Bookings.Remove(booking);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return true;
     }

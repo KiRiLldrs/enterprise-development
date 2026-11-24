@@ -17,9 +17,9 @@ public abstract class BaseCrudController<TRequest, TResponse>(
     /// </summary>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<List<TResponse>> GetAll()
+    public async Task<ActionResult<List<TResponse>>> GetAll()
     {
-        var entities = service.GetAll();
+        var entities = await service.GetAllAsync();
 
         logger.LogInformation(
             "Получен список сущностей типа {EntityType}. Количество: {Count}",
@@ -35,9 +35,9 @@ public abstract class BaseCrudController<TRequest, TResponse>(
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public ActionResult<TResponse> GetById(int id)
+    public async Task<ActionResult<TResponse>> GetById(int id)
     {
-        var entity = service.GetById(id);
+        var entity = await service.GetByIdAsync(id);
 
         if (entity is null)
         {
@@ -63,9 +63,9 @@ public abstract class BaseCrudController<TRequest, TResponse>(
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    public ActionResult<TResponse> Create([FromBody] TRequest request)
+    public async Task<ActionResult<TResponse>> Create([FromBody] TRequest request)
     {
-        var created = service.Add(request);
+        var created = await service.AddAsync(request);
 
         logger.LogInformation(
             "Создана сущность типа {EntityType} с ID {Id}",
@@ -82,9 +82,9 @@ public abstract class BaseCrudController<TRequest, TResponse>(
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public ActionResult Update(int id, [FromBody] TRequest request)
+    public async Task<ActionResult> Update(int id, [FromBody] TRequest request)
     {
-        if (!service.Update(id, request))
+        if (!await service.UpdateAsync(id, request))
         {
             logger.LogWarning(
                 "Не удалось обновить сущность типа {EntityType}: ID {Id} не найден",
@@ -107,9 +107,9 @@ public abstract class BaseCrudController<TRequest, TResponse>(
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public ActionResult Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        if (service.Delete(id))
+        if (await service.DeleteAsync(id))
         {
             logger.LogInformation(
                 "Удалена сущность типа {EntityType} с ID {Id}",

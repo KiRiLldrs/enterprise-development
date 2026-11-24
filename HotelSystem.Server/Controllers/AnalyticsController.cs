@@ -24,7 +24,7 @@ public class AnalyticsController(
     [HttpGet("clients-by-room-category/{category}")]
     [ProducesResponseType<List<ClientResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    public ActionResult<List<ClientResponse>> GetClientsByRoomCategory(
+    public async Task<ActionResult<List<ClientResponse>>> GetClientsByRoomCategory(
         RoomCategory category)
     {
         logger.LogInformation(
@@ -42,7 +42,7 @@ public class AnalyticsController(
                 statusCode: StatusCodes.Status400BadRequest);
         }
 
-        return Ok(analyticsService.GetClientsByRoomCategory(category));
+        return Ok(await analyticsService.GetClientsByRoomCategoryAsync(category));
     }
 
     /// <summary>
@@ -50,11 +50,11 @@ public class AnalyticsController(
     /// </summary>
     [HttpGet("occupied-rooms")]
     [ProducesResponseType<List<RoomResponse>>(StatusCodes.Status200OK)]
-    public ActionResult<List<RoomResponse>> GetCurrentlyBookedRooms()
+    public async Task<ActionResult<List<RoomResponse>>> GetCurrentlyBookedRooms()
     {
         logger.LogInformation("Получен запрос занятых номеров");
 
-        return Ok(analyticsService.GetCurrentlyBookedRooms());
+        return Ok(await analyticsService.GetCurrentlyBookedRoomsAsync());
     }
 
     /// <summary>
@@ -62,12 +62,12 @@ public class AnalyticsController(
     /// </summary>
     [HttpGet("top-booked-rooms")]
     [ProducesResponseType<List<TopBookedRoomResponse>>(StatusCodes.Status200OK)]
-    public ActionResult<List<TopBookedRoomResponse>>
+    public async Task<ActionResult<List<TopBookedRoomResponse>>>
         GetTop5MostFrequentlyBookedRooms()
     {
         logger.LogInformation("Получен запрос топ-5 бронируемых номеров");
 
-        return Ok(analyticsService.GetTop5MostFrequentlyBookedRooms());
+        return Ok(await analyticsService.GetTop5MostFrequentlyBookedRoomsAsync());
     }
 
     /// <summary>
@@ -75,12 +75,12 @@ public class AnalyticsController(
     /// </summary>
     [HttpGet("booking-count-by-room")]
     [ProducesResponseType<List<RoomBookingCountResponse>>(StatusCodes.Status200OK)]
-    public ActionResult<List<RoomBookingCountResponse>>
+    public async Task<ActionResult<List<RoomBookingCountResponse>>>
         GetBookingCountForEachRoom()
     {
         logger.LogInformation("Получен запрос количества бронирований по номерам");
 
-        return Ok(analyticsService.GetBookingCountForEachRoom());
+        return Ok(await analyticsService.GetBookingCountForEachRoomAsync());
     }
 
     /// <summary>
@@ -88,11 +88,11 @@ public class AnalyticsController(
     /// </summary>
     [HttpGet("top-clients-by-cost")]
     [ProducesResponseType<List<TopClientByCostResponse>>(StatusCodes.Status200OK)]
-    public ActionResult<List<TopClientByCostResponse>>
+    public async Task<ActionResult<List<TopClientByCostResponse>>>
         GetTop5ClientsByTotalCost()
     {
         logger.LogInformation("Получен запрос топ-5 клиентов по стоимости проживания");
 
-        return Ok(analyticsService.GetTop5ClientsByTotalCost());
+        return Ok(await analyticsService.GetTop5ClientsByTotalCostAsync());
     }
 }

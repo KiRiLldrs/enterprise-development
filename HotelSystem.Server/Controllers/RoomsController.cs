@@ -23,9 +23,9 @@ public class RoomsController(
     [HttpGet("{id:int}/bookings")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public ActionResult<List<BookingResponse>> GetBookings(int id)
+    public async Task<ActionResult<List<BookingResponse>>> GetBookings(int id)
     {
-        var bookings = bookingService.GetByRoomId(id);
+        var bookings = await bookingService.GetByRoomIdAsync(id);
 
         if (bookings is null)
         {

@@ -1,7 +1,7 @@
-
 using HotelSystem.Domain.Models;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.EfCore.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelSystem.Infrastructure.EfCore.Repositories;
 
@@ -11,26 +11,26 @@ namespace HotelSystem.Infrastructure.EfCore.Repositories;
 public class EfRoomTypeRepository(HotelDbContext context) : IRepository<RoomType>
 {
     /// <inheritdoc />
-    public List<RoomType> GetAll() =>
-        context.RoomTypes.ToList();
+    public async Task<List<RoomType>> GetAllAsync() =>
+        await context.RoomTypes.ToListAsync();
 
     /// <inheritdoc />
-    public RoomType? GetById(int id) =>
-        context.RoomTypes.FirstOrDefault(roomType => roomType.Id == id);
+    public async Task<RoomType?> GetByIdAsync(int id) =>
+        await context.RoomTypes.FirstOrDefaultAsync(roomType => roomType.Id == id);
 
     /// <inheritdoc />
-    public RoomType Add(RoomType roomType)
+    public async Task<RoomType> AddAsync(RoomType roomType)
     {
-        context.RoomTypes.Add(roomType);
-        context.SaveChanges();
+        await context.RoomTypes.AddAsync(roomType);
+        await context.SaveChangesAsync();
 
         return roomType;
     }
 
     /// <inheritdoc />
-    public bool Update(int id, RoomType roomType)
+    public async Task<bool> UpdateAsync(int id, RoomType roomType)
     {
-        var existingRoomType = GetById(id);
+        var existingRoomType = await GetByIdAsync(id);
 
         if (existingRoomType is null)
         {
@@ -38,15 +38,15 @@ public class EfRoomTypeRepository(HotelDbContext context) : IRepository<RoomType
         }
 
         context.Entry(existingRoomType).CurrentValues.SetValues(roomType);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return true;
     }
 
     /// <inheritdoc />
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var roomType = GetById(id);
+        var roomType = await GetByIdAsync(id);
 
         if (roomType is null)
         {
@@ -54,7 +54,7 @@ public class EfRoomTypeRepository(HotelDbContext context) : IRepository<RoomType
         }
 
         context.RoomTypes.Remove(roomType);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return true;
     }

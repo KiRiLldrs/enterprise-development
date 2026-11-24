@@ -1,33 +1,33 @@
 namespace HotelSystem.Domain.Repositories;
 
 /// <summary>
-/// Порт для доступа к хранилищу сущностей
+/// Порт для асинхронного доступа к хранилищу сущностей
 /// </summary>
 public interface IRepository<TEntity>
     where TEntity : class
 {
     /// <summary>
-    /// Возвращает все сущности
+    /// Асинхронно возвращает все сущности
     /// </summary>
-    public List<TEntity> GetAll();
+    public Task<List<TEntity>> GetAllAsync();
 
     /// <summary>
-    /// Возвращает сущность по идентификатору
+    /// Асинхронно возвращает сущность по идентификатору
     /// </summary>
-    public TEntity? GetById(int id);
+    public Task<TEntity?> GetByIdAsync(int id);
 
     /// <summary>
-    /// Добавляет новую сущность и присваивает ей идентификатор
+    /// Асинхронно добавляет новую сущность
     /// </summary>
-    public TEntity Add(TEntity entity);
+    public Task<TEntity> AddAsync(TEntity entity);
 
     /// <summary>
-    /// Заменяет существующую сущность
+    /// Асинхронно заменяет существующую сущность
     /// </summary>
-    public bool Update(int id, TEntity entity);
+    public Task<bool> UpdateAsync(int id, TEntity entity);
 
     /// <summary>
-    /// Удаляет сущность по идентификатору
+    /// Асинхронно удаляет сущность по идентификатору
     /// </summary>
-    public bool Delete(int id);
+    public Task<bool> DeleteAsync(int id);
 }

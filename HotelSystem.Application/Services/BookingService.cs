@@ -16,43 +16,45 @@ public class BookingService(
     : ICrudService<BookingRequest, BookingResponse>
 {
     /// <inheritdoc />
-    public List<BookingResponse> GetAll() =>
-        bookingRepository.GetAll().Select(booking => booking.ToResponse()).ToList();
+    public async Task<List<BookingResponse>> GetAllAsync() =>
+        (await bookingRepository.GetAllAsync())
+            .Select(booking => booking.ToResponse())
+            .ToList();
 
     /// <inheritdoc />
-    public BookingResponse? GetById(int id) =>
-        bookingRepository.GetById(id)?.ToResponse();
+    public async Task<BookingResponse?> GetByIdAsync(int id) =>
+        (await bookingRepository.GetByIdAsync(id))?.ToResponse();
 
     /// <inheritdoc />
-    public BookingResponse Add(BookingRequest request) =>
-        bookingRepository.Add(CreateEntity(request)).ToResponse();
+    public async Task<BookingResponse> AddAsync(BookingRequest request) =>
+        (await bookingRepository.AddAsync(await CreateEntityAsync(request))).ToResponse();
 
     /// <inheritdoc />
-    public bool Update(int id, BookingRequest request)
+    public async Task<bool> UpdateAsync(int id, BookingRequest request)
     {
-        if (bookingRepository.GetById(id) is null)
+        if (await bookingRepository.GetByIdAsync(id) is null)
         {
             return false;
         }
 
-        return bookingRepository.Update(id, CreateEntity(request));
+        return await bookingRepository.UpdateAsync(id, await CreateEntityAsync(request));
     }
 
     /// <inheritdoc />
-    public bool Delete(int id) =>
-        bookingRepository.Delete(id);
+    public async Task<bool> DeleteAsync(int id) =>
+        await bookingRepository.DeleteAsync(id);
 
     /// <summary>
     /// Возвращает бронирования клиента
     /// </summary>
-    public List<BookingResponse>? GetByClientId(int clientId)
+    public async Task<List<BookingResponse>?> GetByClientIdAsync(int clientId)
     {
-        if (clientRepository.GetById(clientId) is null)
+        if (await clientRepository.GetByIdAsync(clientId) is null)
         {
             return null;
         }
 
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .Where(booking => booking.Client.Id == clientId)
             .Select(booking => booking.ToResponse())
             .ToList();
@@ -61,25 +63,25 @@ public class BookingService(
     /// <summary>
     /// Возвращает бронирования номера
     /// </summary>
-    public List<BookingResponse>? GetByRoomId(int roomId)
+    public async Task<List<BookingResponse>?> GetByRoomIdAsync(int roomId)
     {
-        if (roomRepository.GetById(roomId) is null)
+        if (await roomRepository.GetByIdAsync(roomId) is null)
         {
             return null;
         }
 
-        return bookingRepository.GetAll()
+        return (await bookingRepository.GetAllAsync())
             .Where(booking => booking.Room.Id == roomId)
             .Select(booking => booking.ToResponse())
             .ToList();
     }
 
-    private Booking CreateEntity(BookingRequest request)
+    private async Task<Booking> CreateEntityAsync(BookingRequest request)
     {
-        var client = clientRepository.GetById(request.ClientId)
+        var client = await clientRepository.GetByIdAsync(request.ClientId)
             ?? throw new ReferenceNotFoundException("Клиент", request.ClientId);
 
-        var room = roomRepository.GetById(request.RoomId)
+        var room = await roomRepository.GetByIdAsync(request.RoomId)
             ?? throw new ReferenceNotFoundException("Номер", request.RoomId);
 
         return request.ToEntity(client, room);
