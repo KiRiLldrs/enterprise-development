@@ -6,8 +6,11 @@ using HotelSystem.Infrastructure.EfCore.Data;
 using HotelSystem.Infrastructure.EfCore.Repositories;
 using HotelSystem.Server.ExceptionHandlers;
 using Scalar.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -32,6 +35,14 @@ builder.Services.AddScoped<AnalyticsService>();
 
 var app = builder.Build();
 
+// Применение миграций при запуске
+if (app.Environment.IsDevelopment())
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<HotelDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -39,6 +50,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.MapDefaultEndpoints();
 
 app.MapControllers();
 

@@ -23,6 +23,7 @@
     <ProjectReference Include="..\HotelSystem.Infrastructure\HotelSystem.Infrastructure.csproj" />
     <ProjectReference Include="..\HotelSystem.Application.Contracts\HotelSystem.Application.Contracts.csproj" />
     <ProjectReference Include="..\HotelSystem.Infrastructure.EfCore\HotelSystem.Infrastructure.EfCore.csproj" />
+    <ProjectReference Include="..\HotelSystem.ServiceDefaults\HotelSystem.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
